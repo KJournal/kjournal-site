@@ -36,7 +36,8 @@ GPL-3.0 에 따라:
 
 ## 소스 제공 (GPL 대응)
 
-GPL-3.0 준수를 위해, 배포하는 APK 에 대응하는 소스는 아래 중 하나로 제공한다.
+GPL-3.0 준수를 위해, 배포하는 APK 에 대응하는 소스는 아래에서 제공한다.
 
-- 본 저장소의 릴리즈 태그 (예: `v5.0.4`) — private 인 경우 접근 권한 부여 필요
-- 공개 미러 저장소: `menhera_network/fdroid-repo` 의 `sources/` 디렉터리 또는 Release 첨부
+- 앱 저장소: `KJournal/KJournal-Android` (해당 릴리즈의 소스/패치 포함)
+- 릴리즈: `KJournal/KJournal-Android` 의 GitHub Release 자산
+

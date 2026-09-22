@@ -44,7 +44,7 @@ from apk_info import parse_apk  # noqa: E402
 
 INDEX_VERSION = 30000
 LOCALES = ('en-US', 'ko')
-REPO_NAME = 'Menhera Network (KJournal)'
+REPO_NAME = 'KJournal'
 REPO_DESCRIPTION = 'KJournal 한국어 배포판 저장소입니다. 섭취 기록과 효과 타임라인, 실시간 알림을 지원합니다.'
 
 
@@ -186,6 +186,8 @@ def build(args):
             shutil.copy2(a, out / apk_name)
         icon_name = f'{pkg}.{vcode}.png'
         shutil.copy2(icon_src, icons_dir / icon_name)
+        # 일부 클라이언트가 저장소 루트에서 아이콘을 찾는 경우를 대비해 함께 둔다
+        shutil.copy2(icon_src, out / icon_name)
         sig_md5, signer = keytool_cert_digests(a)
         packages.setdefault(pkg, []).append({
             'added': now,
