@@ -1,0 +1,19 @@
+KJournal 5 PB4 (빌드 5019)
+
+번역 수정
+- 화면에 영문으로 남아 있던 문구를 한국어로 번역했습니다.
+  - 색상 선택: Already used / Not yet used / No unused colors
+  - 사용자 단위: Archive
+  - 복사: Copy
+  - 물질 정보: Long-term
+  - 경험 화면: Start is in …
+  - 검색 화면: Keyboard
+  - 카테고리 삭제: Remove
+  - 복용량: Unknown dose
+  - 하단 탭/선택: Stats / Check
+
+이전 빌드(5018)
+- 알림을 기본적으로 접힘 상태로 표시(접힘에서는 그래프 없음), 펼치면 왜곡 없이 표시
+
+이전 빌드(5016)
+- 알림을 켤 때 앱이 종료되던 문제 등 알림 관련 버그 수정

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KJournal __VERSION__ — 다운로드</title>
+<meta name="description" content="KJournal 한국어 배포판 다운로드 (Android)">
+<meta name="robots" content="index, follow">
+<style>
+  :root { color-scheme: light dark; --fg:#111; --muted:#666; --card:#fff; --bg:#f6f7f9; --accent:#4c5ff0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e9e9ea; --muted:#a1a1a6; --card:#17181c; --bg:#0e0f12; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; }
+  header img { width: 64px; height: 64px; border-radius: 16px; }
+  h1 { font-size: 1.55rem; margin: 0; }
+  .sub { color: var(--muted); font-size: .95rem; margin-top: .2rem; }
+  .card { background: var(--card); border-radius: 14px; padding: 1.25rem 1.35rem; margin: 1rem 0;
+          box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 24px rgba(0,0,0,.05); }
+  h2 { font-size: 1.05rem; margin: 0 0 .65rem; }
+  a.btn { display: inline-block; padding: .8rem 1.25rem; border-radius: 10px; background: var(--accent);
+          color: #fff; text-decoration: none; font-weight: 700; }
+  a.btn:hover { filter: brightness(1.08); }
+  .meta { color: var(--muted); font-size: .875rem; margin-top: .75rem; }
+  code, .hash { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; word-break: break-all; }
+  ul { margin: .4rem 0 0; padding-left: 1.15rem; }
+  li { margin: .2rem 0; }
+  footer { color: var(--muted); font-size: .82rem; margin-top: 2rem; text-align: center; }
+  .pill { display:inline-block; background: rgba(76,95,240,.12); color: var(--accent); font-weight:700;
+          font-size:.75rem; padding:.15rem .5rem; border-radius:999px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <img src="icon.png" alt="KJournal 아이콘">
+    <div>
+      <h1>KJournal <span class="pill">__VERSION__</span></h1>
+      <div class="sub">섭취 기록과 효과 타임라인을 관리하는 한국어 저널 · Android</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>다운로드</h2>
+    <p><a class="btn" href="__APK__">APK 내려받기 (__SIZE__ MB)</a></p>
+    <p class="meta">
+      파일: <code>__APK__</code><br>
+      패키지: <code>__APP_ID__</code><br>
+      버전: <code>__VERSION_NAME__</code> (versionCode <code>__VERSION_CODE__</code>)<br>
+      최소 지원: Android 9 (API 28)
+    </p>
+    <p class="meta">SHA-256 (무결성 확인용)<br><span class="hash">__SHA256__</span></p>
+  </div>
+
+  <div class="card">
+    <h2>F-Droid 저장소로 설치 (권장)</h2>
+    <p>F-Droid 앱에 아래 저장소를 추가하면 업데이트를 자동으로 받을 수 있습니다.</p>
+    <p><a class="btn" href="__FDROID_REPO_URL__">저장소 주소 열기</a></p>
+    <p class="meta">
+      저장소 주소: <code>__FDROID_REPO_URL__</code><br>
+      서명 지문(SHA-256): <span class="hash">__FDROID_FINGERPRINT__</span>
+    </p>
+    <ol class="steps">
+      <li>F-Droid 앱 실행</li>
+      <li><b>설정 → 저장소 → 저장소 추가</b></li>
+      <li>위 주소를 붙여넣고 추가</li>
+      <li><b>KJournal</b> 검색 후 설치</li>
+    </ol>
+    <p class="meta">딥링크: <code>fdroidrepos://__FDROID_REPO_HOST__?fingerprint=__FDROID_FINGERPRINT_URI__</code></p>
+    <p class="meta">지문 형식 주의: 딥링크에는 <b>소문자·콜론 없이</b> 넣어야 합니다. (F-Droid 앱 표시용은 위 콜론 형식)</p>
+  </div>
+
+  <div class="card">
+    <h2>설치 방법 (APK 직접 설치)</h2>
+    <ul>
+      <li>위 APK 를 내려받습니다.</li>
+      <li>브라우저/파일 앱에서 APK 를 열고 <b>출처를 알 수 없는 앱 설치 허용</b>을 켭니다.</li>
+      <li>설치 후 앱을 실행합니다.</li>
+      <li>타임라인 알림을 쓰려면 안내에 따라 <b>알림 권한</b>을 허용합니다.</li>
+    </ul>
+    <p class="meta">기존에 다른 키로 서명된 버전이 설치되어 있으면 삭제 후 설치해야 합니다.</p>
+  </div>
+
+  <div class="card">
+    <h2>__VERSION__ 변경 사항</h2>
+    <ul>
+      <li>캘린더 등 날짜 표기를 한국어로 수정 (AUGUST 2026 → 2026년 8월)</li>
+      <li>영문으로 남아 있던 UI 문구 한국어 번역 (색상 선택, 보관, 복사, 장기, 시작까지, 키보드, 제거, 복용량, 탭 등)</li>
+      <li>알림을 켤 때 앱이 종료되던 문제 수정 (Android 14+ 포그라운드 서비스 권한)</li>
+      <li>타임라인 "지금" 표시 중 발생하던 오류 수정</li>
+      <li>알림이 켜진 직후 꺼지던 문제 수정</li>
+      <li>알림 버튼 토글 동작 추가 (다시 누르면 꺼짐)</li>
+      <li>알림 상태에 따라 버튼 아이콘 변경 (▶ / ■)</li>
+      <li>알림은 기본 접힘(접힘에서는 그래프 없음), 펼치면 왜곡 없이 표시</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>라이선스</h2>
+    <p class="meta" style="margin:0">
+      GPL-3.0. 원본 <a href="https://github.com/isaakhanimann/psychonautwiki-journal-android">KJournal</a> (Isaak Hanimann) 기반의 한국어 배포판입니다.
+      재배포 시 소스 공개 및 고지 의무가 있습니다.
+    </p>
+  </div>
+
+  <footer>
+    이 앱은 의학적 조언을 제공하지 않습니다. 모든 판단과 책임은 사용자에게 있습니다.
+  </footer>
+
+</main>
+</body>
+</html>

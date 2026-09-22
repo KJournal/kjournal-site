@@ -1,0 +1,17 @@
+KJournal 5 PB5 (build 5020)
+
+Changed
+- Version bumped to KJournal 5 PB5 (versionName 5 PB5, versionCode 5020).
+
+Translation fixes (since PB4)
+- Strings that were still shown in English are now Korean:
+  color picker (Already used / Not yet used / No unused colors),
+  custom unit (Archive), Copy, substance info (Long-term),
+  experience screen (Start is in ...), search (Keyboard),
+  category (Remove), dose (Unknown dose), tabs/selection (Stats / Check).
+
+Previous builds
+- Notification fixes (foreground service permission, Korean "now" marker,
+  immediate turn-off, toggle and icon state).
+- Notification is collapsed by default (no graph when collapsed) and
+  shows the graph without distortion when expanded.

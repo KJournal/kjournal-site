@@ -1,0 +1,14 @@
+KJournal 5 PB5 (빌드 5020)
+
+변경
+- 버전 표기를 KJournal 5 PB5 로 올렸습니다. (versionName 5 PB5, versionCode 5020)
+
+번역 수정 (PB4 이후)
+- 화면에 영문으로 남아 있던 문구를 한국어로 번역했습니다.
+  색상 선택(Already used / Not yet used / No unused colors),
+  사용자 단위(Archive), Copy, 물질 정보(Long-term), 경험 화면(Start is in …),
+  검색(Keyboard), 카테고리(Remove), 복용량(Unknown dose), 탭/선택(Stats / Check)
+
+이전 빌드
+- 알림 관련 버그 수정(FGS 권한, 한국어 문자열 길이, 즉시 꺼짐, 토글/아이콘)
+- 알림은 기본적으로 접힌 상태(접힘에서는 그래프 없음), 펼치면 왜곡 없이 표시

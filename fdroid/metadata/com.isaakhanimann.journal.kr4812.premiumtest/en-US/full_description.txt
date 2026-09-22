@@ -1,0 +1,16 @@
+KJournal is a journal app for recording substance intake and viewing the resulting
+effects on an effect timeline.
+
+Features
+- Intake log: record substance, route of administration, dose and time.
+- Effect timeline: graph of effect intensity over time.
+- Live notification: keep the ongoing effect timeline visible as a notification.
+- Timeline widget: check the current effect from the home screen.
+- Tolerance / interaction information.
+- Backup and restore as JSON.
+
+This build adds a Korean UI and fixes notification/timeline bugs.
+
+License
+- Original KJournal (GPL-3.0): https://github.com/isaakhanimann/psychonautwiki-journal-android
+- This distribution is also licensed under GPL-3.0.

@@ -1,0 +1,9 @@
+﻿* text=auto eol=lf
+*.sh   text eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.apk  binary
+*.jar  binary
+*.png  binary

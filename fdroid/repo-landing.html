@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KJournal F-Droid 저장소</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:2rem 1.25rem; font:16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+         max-width:720px; margin-inline:auto; }
+  h1 { font-size:1.4rem; margin:0 0 .3rem; }
+  h2 { font-size:1rem; margin:1.8rem 0 .5rem; }
+  p, li { color:#444; }
+  @media (prefers-color-scheme: dark) { p, li { color:#c9c9c9; } }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.85rem; }
+  pre { background:rgba(127,127,127,.12); padding:.8rem 1rem; border-radius:10px; overflow-x:auto; user-select:all; }
+  .muted { color:#777; font-size:.85rem; }
+  a.btn { display:inline-block; margin:.3rem .4rem .3rem 0; padding:.55rem .9rem; border-radius:9px;
+          background:#4c5ff0; color:#fff; text-decoration:none; font-weight:600; font-size:.9rem; }
+  .hash { word-break:break-all; }
+</style>
+</head>
+<body>
+
+<h1>KJournal F-Droid 저장소</h1>
+<p>이 주소는 <b>F-Droid 앱에 추가하는 저장소</b>입니다. 브라우저로 열었다면 아래 방법으로 추가하세요.</p>
+
+<h2>저장소 주소</h2>
+<pre>__REPO_URL__</pre>
+<p class="muted">서명 지문(SHA-256)<br><span class="hash">__FINGERPRINT__</span></p>
+
+<h2>추가 방법</h2>
+<ol>
+  <li>F-Droid 앱 실행</li>
+  <li><b>설정 → 저장소 → 저장소 추가</b></li>
+  <li>위 주소를 붙여넣기</li>
+  <li><b>KJournal</b> 검색 후 설치</li>
+</ol>
+<p class="muted">딥링크: <code>fdroidrepos://__REPO_HOST__?fingerprint=__FINGERPRINT_NOHYPHEN__</code></p>
+
+<h2>저장소 파일</h2>
+<p>
+  <a class="btn" href="index-v1.jar">index-v1.jar</a>
+  <a class="btn" href="index-v1.json">index-v1.json</a>
+  <a class="btn" href="__APK_NAME__">__APK_NAME__</a>
+</p>
+<p class="muted">앱 ID: <code>__APP_ID__</code> · 버전: <code>__VERSION__</code></p>
+
+<p class="muted" style="margin-top:2rem">
+  <a href="/">← 다운로드 페이지로</a>
+</p>
+
+</body>
+</html>

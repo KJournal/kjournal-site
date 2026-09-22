@@ -1,0 +1,26 @@
+# build output (CI 가 생성)
+/public/
+
+# F-Droid 저장소 서명 키/비밀번호 (CI 시크릿으로만 주입)
+/fdroid/keystore.jks
+/fdroid/keystore.properties
+/fdroid/repo/
+
+# 앱 서명 키
+*.keystore
+*.jks
+*.pk8
+*.pem
+
+# python
+__pycache__/
+*.pyc
+
+# os / editor
+.vercel/
+.vercel
+node_modules/
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/

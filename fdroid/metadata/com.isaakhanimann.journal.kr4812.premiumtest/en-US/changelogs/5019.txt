@@ -1,0 +1,20 @@
+KJournal 5 PB4 (build 5019)
+
+Translation fixes
+- Strings that were still shown in English are now translated into Korean:
+  - Color picker: Already used / Not yet used / No unused colors
+  - Custom unit: Archive
+  - Copy
+  - Substance info: Long-term
+  - Experience screen: Start is in ...
+  - Search screen: Keyboard
+  - Category delete: Remove
+  - Dose: Unknown dose
+  - Bottom tab / selection: Stats / Check
+
+Previous build (5018)
+- Notification is collapsed by default (no graph when collapsed), and shows
+  the graph without distortion when expanded.
+
+Previous build (5016)
+- Notification crash/behaviour fixes (foreground service permission, etc.)
