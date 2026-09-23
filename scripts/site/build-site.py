@@ -16,6 +16,7 @@
 """
 import argparse
 import hashlib
+import html
 import json
 import pathlib
 import re
@@ -91,6 +92,30 @@ def changelog_for(apk, version_code):
     return '버그 수정 및 안정성 개선'
 
 
+def render_changelog(text):
+    """체인지로그 텍스트를 사이트용 HTML 로 변환한다 (첫 'KJournal ...' 제목 줄은 생략)."""
+    lines = text.splitlines()
+    if lines and lines[0].strip().lower().startswith('kjournal'):
+        lines = lines[1:]
+    items, paras = [], []
+    for raw in lines:
+        s = raw.strip()
+        if not s:
+            continue
+        if s.startswith(('- ', '* ', '• ')):
+            items.append(html.escape(s[2:].strip()))
+        elif re.match(r'^\d+[.)]\s*', s):
+            items.append(html.escape(re.sub(r'^\d+[.)]\s*', '', s)))
+        else:
+            paras.append(html.escape(s))
+    out = []
+    if paras:
+        out.append('<p>' + '<br>'.join(paras) + '</p>')
+    if items:
+        out.append('<ul>' + ''.join('<li>%s</li>' % i for i in items) + '</ul>')
+    return '\n    '.join(out) if out else '<p>버그 수정 및 안정성 개선</p>'
+
+
 def write_ota_json(apk, info, site_url):
     """앱 OTA(check) 가 읽는 version.json 을 만든다."""
     vcode = int(info.get('versionCode') or 0)
@@ -157,7 +182,8 @@ def main():
     fingerprint = repo_fingerprint()
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
-    html = (template
+    changelog_html = render_changelog(changelog_for(apk, info.get('versionCode')))
+    html_out = (template
             .replace('__VERSION__', version)
             .replace('__VERSION_NAME__', info.get('versionName') or '-')
             .replace('__VERSION_CODE__', info.get('versionCode') or '-')
@@ -165,11 +191,12 @@ def main():
             .replace('__APK__', apk.name)
             .replace('__SIZE__', size_mb)
             .replace('__SHA256__', digest)
+            .replace('__CHANGELOG__', changelog_html)
             .replace('__FDROID_REPO_URL__', args.repo_url.rstrip('/'))
             .replace('__FDROID_REPO_HOST__', re.sub(r'^https?://', '', args.repo_url.rstrip('/')))
             .replace('__FDROID_FINGERPRINT_URI__', (fingerprint or '').replace(':', '').lower())
             .replace('__FDROID_FINGERPRINT__', fingerprint or '(미확인)'))
-    (PUBLIC / 'index.html').write_text(html, encoding='utf-8')
+    (PUBLIC / 'index.html').write_text(html_out, encoding='utf-8')
     (PUBLIC / 'robots.txt').write_text('User-agent: *\nAllow: /\n', encoding='utf-8')
 
     # ── OTA version.json ───────────────────────────────────────
