@@ -160,6 +160,7 @@ def write_ota_json(apk, info, site_url):
     doc = {
         'versionCode': vcode,
         'versionName': info.get('versionName') or '',
+        'date': changelog_date_for(vcode),
         'downloadUrl': f"{site_url.rstrip('/')}/apk/{apk.name}",
         'changelog': changelog_for(apk, vcode),
         'sha256': sha256(apk).lower(),
