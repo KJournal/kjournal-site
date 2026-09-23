@@ -3,108 +3,290 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KJournal __VERSION__ — 다운로드</title>
-<meta name="description" content="KJournal 한국어 배포판 다운로드 (Android)">
+<title>KJournal __MAIN_VERSION__ — 다운로드</title>
+<meta name="description" content="KJournal 한국어 배포판 다운로드 (Android) — 섭취 기록과 효과 타임라인">
 <meta name="robots" content="index, follow">
+<meta name="theme-color" content="#07080c">
 <style>
-  :root { color-scheme: light dark; --fg:#111; --muted:#666; --card:#fff; --bg:#f6f7f9; --accent:#4c5ff0; }
-  @media (prefers-color-scheme: dark) {
-    :root { --fg:#e9e9ea; --muted:#a1a1a6; --card:#17181c; --bg:#0e0f12; }
+  :root {
+    --bg:#07080c; --bg-soft:#0c0e14; --panel:#11141c; --panel-2:#161a24;
+    --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.16);
+    --fg:#eceef4; --muted:#8f96a8; --muted-2:#6b7280;
+    --accent:#7c8cff; --accent-2:#39e6d0; --warn:#ffb454; --danger:#ff7a7a;
+    --radius:18px; --maxw:1080px;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0; background: var(--bg); color: var(--fg);
-    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  main { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
-  header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem; }
-  header img { width: 64px; height: 64px; border-radius: 16px; }
-  h1 { font-size: 1.55rem; margin: 0; }
-  .sub { color: var(--muted); font-size: .95rem; margin-top: .2rem; }
-  .card { background: var(--card); border-radius: 14px; padding: 1.25rem 1.35rem; margin: 1rem 0;
-          box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 24px rgba(0,0,0,.05); }
-  h2 { font-size: 1.05rem; margin: 0 0 .65rem; }
-  a.btn { display: inline-block; padding: .8rem 1.25rem; border-radius: 10px; background: var(--accent);
-          color: #fff; text-decoration: none; font-weight: 700; }
-  a.btn:hover { filter: brightness(1.08); }
-  .meta { color: var(--muted); font-size: .875rem; margin-top: .75rem; }
-  code, .hash { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; word-break: break-all; }
-  ul { margin: .4rem 0 0; padding-left: 1.15rem; }
-  li { margin: .2rem 0; }
-  footer { color: var(--muted); font-size: .82rem; margin-top: 2rem; text-align: center; }
-  .pill { display:inline-block; background: rgba(76,95,240,.12); color: var(--accent); font-weight:700;
-          font-size:.75rem; padding:.15rem .5rem; border-radius:999px; vertical-align:middle; }
+  a { color: inherit; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ── nav ─────────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: saturate(140%) blur(14px);
+    background: rgba(7,8,12,.72); border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+  .brand { display: flex; align-items: center; gap: .6rem; font-weight: 800; letter-spacing: -.01em; text-decoration: none; }
+  .brand img { width: 30px; height: 30px; border-radius: 9px; }
+  .navlinks { display: flex; gap: 1.25rem; font-size: .92rem; color: var(--muted); }
+  .navlinks a { text-decoration: none; }
+  .navlinks a:hover { color: var(--fg); }
+  @media (max-width: 640px) { .navlinks { display: none; } }
+
+  /* ── hero ────────────────────────────────────────────── */
+  header.hero { position: relative; overflow: hidden; padding: 6rem 0 4.5rem; text-align: center; }
+  header.hero::before {
+    content: ""; position: absolute; inset: -40% -10% auto; height: 640px; pointer-events: none;
+    background:
+      radial-gradient(46% 46% at 50% 30%, rgba(124,140,255,.30), transparent 70%),
+      radial-gradient(36% 36% at 74% 14%, rgba(57,230,208,.18), transparent 70%);
+    filter: blur(10px);
+  }
+  header.hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35;
+    background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(60% 55% at 50% 30%, #000 30%, transparent 100%);
+  }
+  .hero .inner { position: relative; z-index: 1; }
+  .hero img.appicon { width: 92px; height: 92px; border-radius: 24px; box-shadow: 0 18px 50px rgba(0,0,0,.55); }
+  .badge {
+    display: inline-block; margin: 1.4rem 0 .9rem; padding: .28rem .7rem; border-radius: 999px;
+    font-size: .76rem; font-weight: 700; letter-spacing: .02em; color: var(--accent-2);
+    background: rgba(57,230,208,.10); border: 1px solid rgba(57,230,208,.28);
+  }
+  h1.title { font-size: clamp(2.4rem, 7vw, 4rem); line-height: 1.04; margin: 0 0 .6rem; letter-spacing: -.03em; }
+  .tagline { color: var(--muted); font-size: clamp(1rem, 2.2vw, 1.18rem); max-width: 44ch; margin: 0 auto 2.2rem; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; }
+  a.btn {
+    display: inline-flex; align-items: center; gap: .6rem; text-decoration: none;
+    padding: .95rem 1.5rem; border-radius: 14px; font-weight: 800; letter-spacing: -.01em;
+    border: 1px solid transparent; transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+  }
+  a.btn small { display: block; font-weight: 600; font-size: .72rem; opacity: .82; letter-spacing: 0; }
+  a.btn .txt { text-align: left; line-height: 1.25; }
+  a.btn:hover { transform: translateY(-1px); }
+  a.btn.primary {
+    background: linear-gradient(135deg, var(--accent), #5f6ef0 60%, #4a58dd);
+    color: #fff; box-shadow: 0 14px 40px rgba(95,110,240,.35);
+  }
+  a.btn.primary:hover { filter: brightness(1.07); }
+  a.btn.ghost { background: rgba(255,255,255,.04); color: var(--fg); border-color: var(--line-strong); }
+  a.btn.ghost:hover { border-color: var(--accent); }
+  .hero-meta { color: var(--muted-2); font-size: .82rem; margin-top: 1.1rem; }
+
+  /* ── sections ────────────────────────────────────────── */
+  section { padding: 3rem 0; }
+  .kicker { color: var(--accent-2); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 .5rem; }
+  .rel { color: var(--muted-2); font-weight: 600; font-size: .78rem; margin-left: .4rem; }
+  h2.sec { font-size: clamp(1.4rem, 3.2vw, 1.9rem); letter-spacing: -.02em; margin: 0 0 .4rem; }
+  .lead { color: var(--muted); margin: 0 0 1.6rem; }
+
+  .grid { display: grid; gap: 1rem; }
+  .grid.g3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.g2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 860px) { .grid.g3, .grid.g2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--bg-soft));
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 1.4rem 1.45rem;
+    box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 20px 50px rgba(0,0,0,.35);
+  }
+  .card h3 { margin: 0 0 .5rem; font-size: 1.05rem; letter-spacing: -.01em; }
+  .card p { margin: .4rem 0; color: var(--muted); font-size: .94rem; }
+  .feature .ico { font-size: 1.35rem; margin-bottom: .5rem; }
+
+  .dl { position: relative; }
+  .dl .tag {
+    position: absolute; top: 1.1rem; right: 1.1rem; font-size: .7rem; font-weight: 800;
+    padding: .22rem .55rem; border-radius: 999px; letter-spacing: .03em;
+  }
+  .dl.main .tag { color: var(--accent); background: rgba(124,140,255,.12); border: 1px solid rgba(124,140,255,.3); }
+  .dl.beta .tag { color: var(--warn); background: rgba(255,180,84,.10); border: 1px solid rgba(255,180,84,.3); }
+  .dl.beta { border-color: rgba(255,180,84,.22); }
+  .kv { font-size: .84rem; color: var(--muted); margin-top: .9rem; }
+  .kv div { display: flex; gap: .5rem; padding: .2rem 0; border-top: 1px dashed var(--line); }
+  .kv span { min-width: 96px; color: var(--muted-2); }
+  code, .hash { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  code { font-size: .84rem; color: #cfd4e4; }
+  .hash { font-size: .78rem; color: var(--muted-2); }
+  .btn.sm { padding: .7rem 1.05rem; border-radius: 11px; font-size: .9rem; }
+  .notice { font-size: .86rem; color: var(--warn); }
+  .hidden { display: none !important; }
+
+  ul.clean { margin: .5rem 0 0; padding-left: 1.1rem; color: var(--muted); }
+  ul.clean li { margin: .3rem 0; }
+  ol.steps { color: var(--muted); padding-left: 1.2rem; margin: .6rem 0 0; }
+  ol.steps li { margin: .3rem 0; }
+
+  .note { color: var(--muted-2); font-size: .82rem; }
+  footer { border-top: 1px solid var(--line); margin-top: 2rem; padding: 2.2rem 0 3rem; color: var(--muted-2); font-size: .84rem; text-align: center; }
+  footer a { color: var(--muted); }
 </style>
 </head>
 <body>
-<main>
 
-  <header>
-    <img src="icon.png" alt="KJournal 아이콘">
-    <div>
-      <h1>KJournal <span class="pill">__VERSION__</span></h1>
-      <div class="sub">섭취 기록과 효과 타임라인을 관리하는 한국어 저널 · Android</div>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="icon.png" alt=""> KJournal</a>
+    <div class="navlinks">
+      <a href="#download">다운로드</a>
+      <a href="#changes">변경 사항</a>
+      <a href="#fdroid">F-Droid</a>
+      <a href="https://github.com/KJournal/KJournal-Android">GitHub</a>
     </div>
-  </header>
-
-  <div class="card">
-    <h2>다운로드</h2>
-    <p><a class="btn" href="__APK__">APK 내려받기 (__SIZE__ MB)</a></p>
-    <p class="meta">
-      파일: <code>__APK__</code><br>
-      패키지: <code>__APP_ID__</code><br>
-      버전: <code>__VERSION_NAME__</code> (versionCode <code>__VERSION_CODE__</code>)<br>
-      최소 지원: Android 9 (API 28)
-    </p>
-    <p class="meta">SHA-256 (무결성 확인용)<br><span class="hash">__SHA256__</span></p>
   </div>
+</nav>
 
-  <div class="card">
-    <h2>F-Droid 저장소로 설치 (권장)</h2>
-    <p>F-Droid 앱에 아래 저장소를 추가하면 업데이트를 자동으로 받을 수 있습니다.</p>
-    <p><a class="btn" href="__FDROID_REPO_URL__">저장소 주소 열기</a></p>
-    <p class="meta">
-      저장소 주소: <code>__FDROID_REPO_URL__</code><br>
-      서명 지문(SHA-256): <span class="hash">__FDROID_FINGERPRINT__</span>
-    </p>
-    <ol class="steps">
-      <li>F-Droid 앱 실행</li>
-      <li><b>설정 → 저장소 → 저장소 추가</b></li>
-      <li>위 주소를 붙여넣고 추가</li>
-      <li><b>KJournal</b> 검색 후 설치</li>
-    </ol>
-    <p class="meta">딥링크: <code>fdroidrepos://__FDROID_REPO_HOST__?fingerprint=__FDROID_FINGERPRINT_URI__</code></p>
-    <p class="meta">지문 형식 주의: 딥링크에는 <b>소문자·콜론 없이</b> 넣어야 합니다. (F-Droid 앱 표시용은 위 콜론 형식)</p>
+<header class="hero" id="top">
+  <div class="wrap inner">
+    <img class="appicon" src="icon.png" alt="KJournal 아이콘">
+    <div><span class="badge">Android 9+ · 한국어</span></div>
+    <h1 class="title">KJournal</h1>
+    <p class="tagline">섭취 기록과 효과 타임라인을 한 곳에서. 물질 정보와 안전 가이드를 한국어로 확인하세요.</p>
+
+    <div class="cta">
+      <a class="btn primary" href="__MAIN_APK__">
+        <span class="txt">메인 다운로드<small>안정 · __MAIN_VERSION__ · __MAIN_SIZE__ MB</small></span>
+      </a>
+      <a class="btn ghost __BETA_HIDDEN__" href="__BETA_APK__">
+        <span class="txt">배타 다운로드<small>최신 테스트 · __BETA_VERSION__ · __BETA_SIZE__ MB</small></span>
+      </a>
+    </div>
+
+    <p class="hero-meta">패키지 <code>__APP_ID__</code> · 최소 Android 9 (API 28) · 서명: KJournal Mod</p>
   </div>
+</header>
 
-  <div class="card">
-    <h2>설치 방법 (APK 직접 설치)</h2>
-    <ul>
-      <li>위 APK 를 내려받습니다.</li>
-      <li>브라우저/파일 앱에서 APK 를 열고 <b>출처를 알 수 없는 앱 설치 허용</b>을 켭니다.</li>
-      <li>설치 후 앱을 실행합니다.</li>
-      <li>타임라인 알림을 쓰려면 안내에 따라 <b>알림 권한</b>을 허용합니다.</li>
-    </ul>
-    <p class="meta">기존에 다른 키로 서명된 버전이 설치되어 있으면 삭제 후 설치해야 합니다.</p>
+<section id="download">
+  <div class="wrap">
+    <p class="kicker">Download</p>
+    <h2 class="sec">다운로드</h2>
+    <p class="lead">안정 버전과 배타(테스트) 버전을 제공합니다. 처음이라면 <b>메인</b>을 권장합니다.</p>
+
+    <div class="grid g2">
+      <div class="card dl main">
+        <span class="tag">MAIN · 안정</span>
+        <h3>메인 다운로드</h3>
+        <p>공개 배포용 안정 버전입니다. 일반 사용에 권장됩니다.</p>
+        <p><a class="btn primary sm" href="__MAIN_APK__">APK 내려받기 (__MAIN_SIZE__ MB)</a></p>
+        <div class="kv">
+          <div><span>버전</span><code>__MAIN_VERSION__</code></div>
+          <div><span>날짜</span><code>__MAIN_DATE__</code></div>
+          <div><span>versionCode</span><code>__MAIN_VERSION_CODE__</code></div>
+          <div><span>파일</span><code>__MAIN_APK__</code></div>
+        </div>
+        <p class="note" style="margin-top:.7rem">SHA-256<br><span class="hash">__MAIN_SHA256__</span></p>
+      </div>
+
+      <div class="card dl beta __BETA_HIDDEN__">
+        <span class="tag">BETA · 테스트</span>
+        <h3>배타 다운로드</h3>
+        <p class="notice">최신 기능이 먼저 들어가는 테스트 빌드입니다. 문제가 있을 수 있으며, 설치 전 데이터 백업을 권장합니다.</p>
+        <p><a class="btn ghost sm" href="__BETA_APK__">APK 내려받기 (__BETA_SIZE__ MB)</a></p>
+        <div class="kv">
+          <div><span>버전</span><code>__BETA_VERSION__</code></div>
+          <div><span>날짜</span><code>__BETA_DATE__</code></div>
+          <div><span>versionCode</span><code>__BETA_VERSION_CODE__</code></div>
+          <div><span>파일</span><code>__BETA_APK__</code></div>
+        </div>
+        <p class="note" style="margin-top:.7rem">SHA-256<br><span class="hash">__BETA_SHA256__</span></p>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="card">
-    <h2>__VERSION__ 변경 사항</h2>
-    __CHANGELOG__
+<section>
+  <div class="wrap">
+    <p class="kicker">Features</p>
+    <h2 class="sec">주요 기능</h2>
+    <div class="grid g3">
+      <div class="card feature"><div class="ico">📈</div><h3>효과 타임라인</h3><p>물질별 효과 지속 시간을 그래프로 시각화해 언제 어떤 상태인지 한눈에 봅니다.</p></div>
+      <div class="card feature"><div class="ico">🧪</div><h3>물질 정보</h3><p>복용량 기준, 투여 경로, 지속 시간 등 방대한 데이터를 한국어로 제공합니다.</p></div>
+      <div class="card feature"><div class="ico">🛡️</div><h3>안전 가이드</h3><p>위험 조합, 안전한 사용 수칙, 응급 시 대처를 앱 안에서 바로 확인합니다.</p></div>
+    </div>
   </div>
+</section>
 
-  <div class="card">
-    <h2>라이선스</h2>
-    <p class="meta" style="margin:0">
-      GPL-3.0. 원본 <a href="https://github.com/isaakhanimann/psychonautwiki-journal-android">KJournal</a> (Isaak Hanimann) 기반의 한국어 배포판입니다.
-      재배포 시 소스 공개 및 고지 의무가 있습니다.
-    </p>
+<section id="changes">
+  <div class="wrap">
+    <p class="kicker">Changelog</p>
+    <h2 class="sec">변경 사항</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>메인 __MAIN_VERSION__ <span class="rel">__MAIN_DATE__</span></h3>
+        __CHANGELOG__
+      </div>
+      <div class="card __BETA_HIDDEN__">
+        <h3>배타 __BETA_VERSION__ <span class="rel">__BETA_DATE__</span></h3>
+        __BETA_CHANGELOG__
+      </div>
+    </div>
   </div>
+</section>
 
-  <footer>
-    이 앱은 의학적 조언을 제공하지 않습니다. 모든 판단과 책임은 사용자에게 있습니다.
-  </footer>
+<section id="fdroid">
+  <div class="wrap">
+    <p class="kicker">F-Droid</p>
+    <h2 class="sec">F-Droid 저장소로 설치 (권장)</h2>
+    <p class="lead">저장소를 추가하면 업데이트를 자동으로 받을 수 있습니다.</p>
+    <div class="card">
+      <p><a class="btn ghost sm" href="__FDROID_REPO_URL__">저장소 주소 열기</a></p>
+      <div class="kv">
+        <div><span>주소</span><code>__FDROID_REPO_URL__</code></div>
+        <div><span>지문(SHA-256)</span><span class="hash">__FDROID_FINGERPRINT__</span></div>
+      </div>
+      <ol class="steps">
+        <li>F-Droid 앱 실행</li>
+        <li><b>설정 → 저장소 → 저장소 추가</b></li>
+        <li>위 주소를 붙여넣고 추가</li>
+        <li><b>KJournal</b> 검색 후 설치</li>
+      </ol>
+      <p class="note" style="margin-top:.7rem">딥링크: <code>fdroidrepos://__FDROID_REPO_HOST__?fingerprint=__FDROID_FINGERPRINT_URI__</code><br>딥링크 지문은 소문자·콜론 없이 넣어야 합니다.</p>
+    </div>
+  </div>
+</section>
 
-</main>
+<section>
+  <div class="wrap">
+    <p class="kicker">Install</p>
+    <h2 class="sec">설치 방법 (APK 직접 설치)</h2>
+    <div class="card">
+      <ul class="clean">
+        <li>위에서 APK 를 내려받습니다.</li>
+        <li>브라우저/파일 앱에서 APK 를 열고 <b>출처를 알 수 없는 앱 설치 허용</b>을 켭니다.</li>
+        <li>설치 후 앱을 실행합니다.</li>
+        <li>타임라인 알림을 쓰려면 안내에 따라 <b>알림 권한</b>을 허용합니다.</li>
+      </ul>
+      <p class="note" style="margin-top:.8rem">기존에 다른 키로 서명된 버전(PB6 이하)이 설치되어 있으면 삭제 후 설치해야 합니다. PB7 → PB8 업데이트는 그대로 설치됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="kicker">License</p>
+    <h2 class="sec">라이선스</h2>
+    <div class="card">
+      <p>GPL-3.0. 원본 <a href="https://github.com/isaakhanimann/psychonautwiki-journal-android">KJournal</a> (Isaak Hanimann) 기반의 한국어 배포판입니다. 재배포 시 소스 공개 및 고지 의무가 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    이 앱은 의학적 조언을 제공하지 않습니다. 모든 판단과 책임은 사용자에게 있습니다.<br>
+    <a href="https://github.com/KJournal/KJournal-Android">GitHub</a>
+  </div>
+</footer>
+
 </body>
 </html>

@@ -88,14 +88,50 @@ def changelog_for(apk, version_code):
     for loc in ('ko', 'en-US'):
         f = FDROID_DIR / 'metadata' / 'com.isaakhanimann.journal.kr4812.premiumtest' / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
-            return f.read_text(encoding='utf-8').strip()
+            text = f.read_text(encoding='utf-8').strip()
+            # 날짜 줄은 본문에서 제외 (release-notes.json 의 date 필드로 별도 제공)
+            lines = [l for l in text.splitlines() if not changelog_date(l)]
+            return '\n'.join(lines).strip()
     return '버그 수정 및 안정성 개선'
 
 
+def changelog_date_for(version_code):
+    for loc in ('ko', 'en-US'):
+        f = FDROID_DIR / 'metadata' / 'com.isaakhanimann.journal.kr4812.premiumtest' / loc / 'changelogs' / f'{version_code}.txt'
+        if f.is_file():
+            d = changelog_date(f.read_text(encoding='utf-8'))
+            if d:
+                return d
+    return ''
+
+
+DATE_RE = re.compile(r'^(?:날짜|date|released?)\s*[:：]\s*(\d{4}-\d{2}-\d{2})\s*$', re.I)
+BARE_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+
+
+def changelog_date(text):
+    """changelog txt 에서 첫 날짜 줄을 찾는다 (`날짜: 2026-09-23` 또는 `2026-09-23`)."""
+    for raw in text.splitlines():
+        s = raw.strip()
+        m = DATE_RE.match(s)
+        if m:
+            return m.group(1)
+        if BARE_DATE_RE.match(s):
+            return s
+    return ''
+
+
 def render_changelog(text):
-    """체인지로그 텍스트를 사이트용 HTML 로 변환한다 (첫 'KJournal ...' 제목 줄은 생략)."""
+    """체인지로그 텍스트를 사이트용 HTML 로 변환한다.
+
+    맨 앞의 빈 줄/`변경` 류 머리말/날짜 줄과 첫 'KJournal ...' 제목 줄은 생략한다.
+    """
     lines = text.splitlines()
     if lines and lines[0].strip().lower().startswith('kjournal'):
+        lines = lines[1:]
+    skip = {'변경', '변경 사항', '변경사항', 'changes', 'change'}
+    while lines and (not lines[0].strip() or lines[0].strip().lower() in skip
+                     or changelog_date(lines[0])):
         lines = lines[1:]
     items, paras = [], []
     for raw in lines:
@@ -133,38 +169,101 @@ def write_ota_json(apk, info, site_url):
     return doc
 
 
+def write_release_notes_json():
+    """앱 릴리즈노트 화면이 읽는 전체 버전 노트 목록(ota/release-notes.json)."""
+    pkg = 'com.isaakhanimann.journal.kr4812.premiumtest'
+    entries, seen = [], set()
+    for loc in ('ko', 'en-US'):
+        cdir = FDROID_DIR / 'metadata' / pkg / loc / 'changelogs'
+        if not cdir.is_dir():
+            continue
+        for f in sorted(cdir.glob('*.txt')):
+            if not f.stem.isdigit() or int(f.stem) in seen:
+                continue
+            seen.add(int(f.stem))
+            text = f.read_text(encoding='utf-8')
+            lines = [l.strip() for l in text.splitlines()]
+            lines = [l for l in lines
+                     if l and l not in ('변경', '변경 사항', 'Changes', 'Change')
+                     and not changelog_date(l)]
+            name = ''
+            if lines and lines[0].lower().startswith('kjournal'):
+                name = lines[0][len('KJournal'):].strip()
+                lines = lines[1:]
+            lines = [(l[2:].strip() if l.startswith('- ') else l) for l in lines]
+            entries.append({'versionCode': int(f.stem), 'versionName': name,
+                            'date': changelog_date(text), 'notes': lines})
+    entries.sort(key=lambda x: x['versionCode'], reverse=True)
+    outdir = PUBLIC / 'ota'
+    outdir.mkdir(parents=True, exist_ok=True)
+    (outdir / 'release-notes.json').write_text(
+        json.dumps(entries, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return entries
+
+
+def _default_channels():
+    """dist/ 에서 (메인, 배타) 를 고른다.
+
+    기본은 versionCode 최고를 메인으로 두는 단독 배포. 배타는 `--beta-apk` 로 지정한다.
+    """
+    apks = sorted(DIST.glob('*.apk'))
+    if not apks:
+        return None, None
+
+    def _vcode(p):
+        try:
+            return int(parse_apk(p)['versionCode'] or 0)
+        except Exception:  # noqa: BLE001
+            return 0
+    apks.sort(key=_vcode, reverse=True)
+    return apks[0], None
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--apk', default=None, help='배포할 APK (기본: dist/ 에서 versionCode 최고)')
-    ap.add_argument('--version', default=None, help='표시 버전 라벨 (기본: APK 파일명 기반)')
+    ap.add_argument('--apk', default=None, help='(레거시) 단일 APK — 지정 시 메인으로 사용')
+    ap.add_argument('--main-apk', default=None, help='메인(안정) 다운로드 APK')
+    ap.add_argument('--beta-apk', default=None, help='배타(테스트) 다운로드 APK')
+    ap.add_argument('--version', default=None, help='메인 표시 버전 라벨 (기본: APK 파일명 기반)')
+    ap.add_argument('--beta-version', default=None, help='배타 표시 버전 라벨 (기본: APK 파일명 기반)')
     ap.add_argument('--repo-url', default=DEFAULT_REPO)
     ap.add_argument('--site-url', default=DEFAULT_SITE)
     ap.add_argument('--skip-index', action='store_true', help='F-Droid 저장소 생성을 건너뛴다')
     args = ap.parse_args()
 
-    if args.apk:
-        apk = pathlib.Path(args.apk)
+    explicit_main = args.main_apk or args.apk
+    if explicit_main:
+        apk = pathlib.Path(explicit_main)
+        beta = pathlib.Path(args.beta_apk) if args.beta_apk else None
     else:
-        apks = sorted(DIST.glob('*.apk'))
-        if not apks:
-            print('dist/ 에 APK 가 없습니다.', file=sys.stderr)
-            return 1
+        apk, default_beta = _default_channels()
+        beta = pathlib.Path(args.beta_apk) if args.beta_apk else default_beta
 
-        def _vcode(p):
-            try:
-                return int(parse_apk(p)['versionCode'] or 0)
-            except Exception:  # noqa: BLE001
-                return 0
-        apk = max(apks, key=_vcode)
-
+    if apk is None:
+        print('dist/ 에 APK 가 없습니다.', file=sys.stderr)
+        return 1
     if not apk.is_file():
         print(f'APK 를 찾을 수 없습니다: {apk}', file=sys.stderr)
         return 1
+
+    if beta is not None and not beta.is_file():
+        print(f'배타 APK 를 찾을 수 없습니다: {beta}', file=sys.stderr)
+        return 1
+    if beta is not None and beta.resolve() == apk.resolve():
+        beta = None
 
     info = parse_apk(apk)
     version = args.version or apk.stem.replace('KJournal-', '')
     digest = sha256(apk)
     size_mb = f'{apk.stat().st_size / (1024 * 1024):.1f}'
+
+    if beta is not None:
+        binfo = parse_apk(beta)
+        bversion = args.beta_version or beta.stem.replace('KJournal-', '')
+        bdigest = sha256(beta)
+        bsize_mb = f'{beta.stat().st_size / (1024 * 1024):.1f}'
+    else:
+        binfo, bversion, bdigest, bsize_mb = {}, '', '', ''
 
     if PUBLIC.exists():
         shutil.rmtree(PUBLIC)
@@ -175,6 +274,13 @@ def main():
     (PUBLIC / 'apk').mkdir(parents=True, exist_ok=True)
     shutil.copy2(apk, PUBLIC / 'apk' / apk.name)
 
+    if beta is not None:
+        if not (PUBLIC / beta.name).exists():
+            shutil.copy2(beta, PUBLIC / beta.name)
+        bdst = PUBLIC / 'apk' / beta.name
+        if not bdst.exists():
+            shutil.copy2(beta, bdst)
+
     icon = FDROID_DIR / 'icon.png'
     if icon.is_file():
         shutil.copy2(icon, PUBLIC / 'icon.png')
@@ -183,7 +289,31 @@ def main():
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
     changelog_html = render_changelog(changelog_for(apk, info.get('versionCode')))
+    main_date = changelog_date_for(info.get('versionCode'))
+    if beta is not None:
+        beta_changelog_html = render_changelog(changelog_for(beta, binfo.get('versionCode')))
+        beta_date = changelog_date_for(binfo.get('versionCode'))
+    else:
+        beta_changelog_html = ''
+        beta_date = ''
     html_out = (template
+            .replace('__MAIN_DATE__', main_date or '-')
+            .replace('__MAIN_VERSION__', version)
+            .replace('__MAIN_VERSION_NAME__', info.get('versionName') or '-')
+            .replace('__MAIN_VERSION_CODE__', info.get('versionCode') or '-')
+            .replace('__MAIN_APK__', apk.name)
+            .replace('__MAIN_SIZE__', size_mb)
+            .replace('__MAIN_SHA256__', digest)
+            .replace('__BETA_DATE__', beta_date or '-')
+            .replace('__BETA_VERSION__', bversion)
+            .replace('__BETA_VERSION_NAME__', binfo.get('versionName') or '-')
+            .replace('__BETA_VERSION_CODE__', binfo.get('versionCode') or '-')
+            .replace('__BETA_APK__', beta.name if beta is not None else '')
+            .replace('__BETA_SIZE__', bsize_mb)
+            .replace('__BETA_SHA256__', bdigest)
+            .replace('__BETA_CHANGELOG__', beta_changelog_html)
+            .replace('__BETA_HIDDEN__', '' if beta is not None else 'hidden')
+            # 레거시 토큰(단일 APK 템플릿 호환) — 메인 기준
             .replace('__VERSION__', version)
             .replace('__VERSION_NAME__', info.get('versionName') or '-')
             .replace('__VERSION_CODE__', info.get('versionCode') or '-')
@@ -201,6 +331,10 @@ def main():
 
     # ── OTA version.json ───────────────────────────────────────
     ota = write_ota_json(apk, info, args.site_url)
+
+    # ── 릴리즈노트 전체 목록(앱 릴리즈노트 화면용) ──────────────
+    notes = write_release_notes_json()
+    print(f'릴리즈노트 {len(notes)}개 버전: ' + ', '.join(str(n["versionCode"]) for n in notes[:6]))
 
     # ── F-Droid 커스텀 저장소 ───────────────────────────────────
     if not args.skip_index:
