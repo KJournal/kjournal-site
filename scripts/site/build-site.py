@@ -154,6 +154,13 @@ def render_changelog(text):
     return '\n    '.join(out) if out else '<p>버그 수정 및 안정성 개선</p>'
 
 
+def with_site_link(text, site_url):
+    """체인지로그/릴리즈노트 끝에 사이트 주소 줄을 붙인다 (앱 릴리즈노트·OTA 안내에서 노출)."""
+    line = '사이트: %s/' % site_url.rstrip('/')
+    text = (text or '').strip()
+    return (text + '\n' + line) if text else line
+
+
 def write_ota_json(apk, info, site_url):
     """앱 OTA(check) 가 읽는 version.json 을 만든다."""
     vcode = int(info.get('versionCode') or 0)
@@ -162,7 +169,7 @@ def write_ota_json(apk, info, site_url):
         'versionName': info.get('versionName') or '',
         'date': changelog_date_for(vcode),
         'downloadUrl': f"{site_url.rstrip('/')}/apk/{apk.name}",
-        'changelog': changelog_for(apk, vcode),
+        'changelog': with_site_link(changelog_for(apk, vcode), site_url),
         'sha256': sha256(apk).lower(),
     }
     outdir = PUBLIC / 'ota'
@@ -172,7 +179,7 @@ def write_ota_json(apk, info, site_url):
     return doc
 
 
-def write_release_notes_json():
+def write_release_notes_json(site_url):
     """앱 릴리즈노트 화면이 읽는 전체 버전 노트 목록(ota/release-notes.json)."""
     pkg = 'com.isaakhanimann.journal.kr4812.premiumtest'
     entries, seen = [], set()
@@ -194,6 +201,7 @@ def write_release_notes_json():
                 name = lines[0][len('KJournal'):].strip()
                 lines = lines[1:]
             lines = [(l[2:].strip() if l.startswith('- ') else l) for l in lines]
+            lines.append('사이트: %s/' % site_url.rstrip('/'))
             entries.append({'versionCode': int(f.stem), 'versionName': name,
                             'date': changelog_date(text), 'notes': lines})
     entries.sort(key=lambda x: x['versionCode'], reverse=True)
@@ -336,7 +344,7 @@ def main():
     ota = write_ota_json(apk, info, args.site_url)
 
     # ── 릴리즈노트 전체 목록(앱 릴리즈노트 화면용) ──────────────
-    notes = write_release_notes_json()
+    notes = write_release_notes_json(args.site_url)
     print(f'릴리즈노트 {len(notes)}개 버전: ' + ', '.join(str(n["versionCode"]) for n in notes[:6]))
 
     # ── F-Droid 커스텀 저장소 ───────────────────────────────────
