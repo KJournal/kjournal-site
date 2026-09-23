@@ -89,8 +89,10 @@ def changelog_for(apk, version_code):
         f = FDROID_DIR / 'metadata' / 'com.isaakhanimann.journal.kr4812.premiumtest' / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
             text = f.read_text(encoding='utf-8').strip()
-            # 날짜 줄은 본문에서 제외 (release-notes.json 의 date 필드로 별도 제공)
-            lines = [l for l in text.splitlines() if not changelog_date(l)]
+            # 날짜 줄과 '변경' 류 머리말은 본문에서 제외
+            header = {'변경', '변경 사항', '변경사항', 'changes', 'change'}
+            lines = [l for l in text.splitlines()
+                     if l.strip() and not changelog_date(l) and l.strip().lower() not in header]
             return '\n'.join(lines).strip()
     return '버그 수정 및 안정성 개선'
 
