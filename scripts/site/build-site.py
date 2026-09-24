@@ -318,6 +318,7 @@ def main():
         beta_changelog_html = ''
         beta_date = ''
     html_out = (template
+            .replace('__CHANNEL__', 'Public Beta' if 'PB' in (info.get('versionName') or '') else '안정')
             .replace('__MAIN_DATE__', main_date or '-')
             .replace('__MAIN_VERSION__', version)
             .replace('__MAIN_VERSION_NAME__', info.get('versionName') or '-')
