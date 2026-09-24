@@ -154,11 +154,19 @@ def render_changelog(text):
     return '\n    '.join(out) if out else '<p>버그 수정 및 안정성 개선</p>'
 
 
+def link_lines(site_url):
+    """체인지로그/릴리즈노트 끝에 붙일 주소 줄 (사이트 + GitHub)."""
+    return ['사이트: %s/' % site_url.rstrip('/'),
+            'GitHub: https://github.com/KJournal']
+
+
 def with_site_link(text, site_url):
-    """체인지로그/릴리즈노트 끝에 사이트 주소 줄을 붙인다 (앱 릴리즈노트·OTA 안내에서 노출)."""
-    line = '사이트: %s/' % site_url.rstrip('/')
-    text = (text or '').strip()
-    return (text + '\n' + line) if text else line
+    """체인지로그 끝에 사이트·GitHub 주소 줄을 붙인다 (이미 있으면 중복 추가 안 함)."""
+    lines = (text or '').strip().splitlines()
+    for line in link_lines(site_url):
+        if not any(l.strip() == line for l in lines):
+            lines.append(line)
+    return '\n'.join(lines)
 
 
 def write_ota_json(apk, info, site_url):
@@ -201,7 +209,9 @@ def write_release_notes_json(site_url):
                 name = lines[0][len('KJournal'):].strip()
                 lines = lines[1:]
             lines = [(l[2:].strip() if l.startswith('- ') else l) for l in lines]
-            lines.append('사이트: %s/' % site_url.rstrip('/'))
+            for line in link_lines(site_url):
+                if not any(l.strip() == line for l in lines):
+                    lines.append(line)
             entries.append({'versionCode': int(f.stem), 'versionName': name,
                             'date': changelog_date(text), 'notes': lines})
     entries.sort(key=lambda x: x['versionCode'], reverse=True)
