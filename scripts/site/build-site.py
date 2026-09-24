@@ -86,7 +86,7 @@ def repo_fingerprint():
 
 def changelog_for(apk, version_code):
     for loc in ('ko', 'en-US'):
-        f = FDROID_DIR / 'metadata' / 'com.isaakhanimann.journal.kr4812.premiumtest' / loc / 'changelogs' / f'{version_code}.txt'
+        f = FDROID_DIR / 'metadata' / 'com.jiwxn3.KJournal' / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
             text = f.read_text(encoding='utf-8').strip()
             # 날짜 줄과 '변경' 류 머리말은 본문에서 제외
@@ -99,7 +99,7 @@ def changelog_for(apk, version_code):
 
 def changelog_date_for(version_code):
     for loc in ('ko', 'en-US'):
-        f = FDROID_DIR / 'metadata' / 'com.isaakhanimann.journal.kr4812.premiumtest' / loc / 'changelogs' / f'{version_code}.txt'
+        f = FDROID_DIR / 'metadata' / 'com.jiwxn3.KJournal' / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
             d = changelog_date(f.read_text(encoding='utf-8'))
             if d:
@@ -169,11 +169,27 @@ def with_site_link(text, site_url):
     return '\n'.join(lines)
 
 
+def ota_hold_version_code():
+    """릴리즈 보류 중 OTA 팝업을 막기 위한 홀드 버전코드.
+
+    저장소 루트의 `.ota_hold` 파일에 숫자가 있으면 version.json 의 versionCode 를
+    그 값으로 고정한다(설치본보다 크지 않게 두어 업데이트 팝업이 뜨지 않게 함).
+    홀드를 해제하려면 파일을 지우면 된다.
+    """
+    f = ROOT / '.ota_hold'
+    if f.is_file():
+        try:
+            return int(f.read_text(encoding='utf-8').strip())
+        except Exception:  # noqa: BLE001
+            return None
+    return None
+
+
 def write_ota_json(apk, info, site_url):
     """앱 OTA(check) 가 읽는 version.json 을 만든다."""
     vcode = int(info.get('versionCode') or 0)
     doc = {
-        'versionCode': vcode,
+        'versionCode': ota_hold_version_code() or vcode,
         'versionName': info.get('versionName') or '',
         'date': changelog_date_for(vcode),
         'downloadUrl': f"{site_url.rstrip('/')}/apk/{apk.name}",
@@ -189,7 +205,7 @@ def write_ota_json(apk, info, site_url):
 
 def write_release_notes_json(site_url):
     """앱 릴리즈노트 화면이 읽는 전체 버전 노트 목록(ota/release-notes.json)."""
-    pkg = 'com.isaakhanimann.journal.kr4812.premiumtest'
+    pkg = 'com.jiwxn3.KJournal'
     entries, seen = [], set()
     for loc in ('ko', 'en-US'):
         cdir = FDROID_DIR / 'metadata' / pkg / loc / 'changelogs'
