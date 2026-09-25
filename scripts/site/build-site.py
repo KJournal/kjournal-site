@@ -185,8 +185,8 @@ def ota_hold_version_code():
     return None
 
 
-def write_ota_json(apk, info, site_url):
-    """앱 OTA(check) 가 읽는 version.json 을 만든다."""
+def write_ota_json(apk, info, site_url, filename='version.json'):
+    """앱 OTA(check) 가 읽는 version.json(또는 beta-version.json) 을 만든다."""
     vcode = int(info.get('versionCode') or 0)
     doc = {
         'versionCode': ota_hold_version_code() or vcode,
@@ -198,7 +198,7 @@ def write_ota_json(apk, info, site_url):
     }
     outdir = PUBLIC / 'ota'
     outdir.mkdir(parents=True, exist_ok=True)
-    (outdir / 'version.json').write_text(
+    (outdir / filename).write_text(
         json.dumps(doc, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return doc
 
@@ -233,19 +233,20 @@ def write_release_notes_json(site_url):
     entries.sort(key=lambda x: x['versionCode'], reverse=True)
     outdir = PUBLIC / 'ota'
     outdir.mkdir(parents=True, exist_ok=True)
-    (outdir / 'release-notes.json').write_text(
-        json.dumps(entries, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    payload = json.dumps(entries, ensure_ascii=False, indent=2) + '\n'
+    # 정식/배타 채널이 서로 다른 릴리즈노트 엔드포인트를 본다.
+    (outdir / 'release-notes.json').write_text(payload, encoding='utf-8')
+    (outdir / 'beta-release-notes.json').write_text(payload, encoding='utf-8')
     return entries
 
 
-def _default_channels():
-    """dist/ 에서 (메인, 배타) 를 고른다.
-
-    기본은 versionCode 최고를 메인으로 두는 단독 배포. 배타는 `--beta-apk` 로 지정한다.
-    """
-    apks = sorted(DIST.glob('*.apk'))
+def _newest_apk(folder):
+    """폴더에서 versionCode 가 가장 큰 APK 를 고른다(없으면 None)."""
+    if not folder.is_dir():
+        return None
+    apks = sorted(folder.glob('*.apk'))
     if not apks:
-        return None, None
+        return None
 
     def _vcode(p):
         try:
@@ -253,7 +254,16 @@ def _default_channels():
         except Exception:  # noqa: BLE001
             return 0
     apks.sort(key=_vcode, reverse=True)
-    return apks[0], None
+    return apks[0]
+
+
+def _default_channels():
+    """채널별 APK 를 고른다.
+
+    - 정식(메인): `dist/*.apk` 중 versionCode 최고
+    - 배타: `dist/beta/*.apk` 중 versionCode 최고 (없으면 배타 버튼 숨김)
+    """
+    return _newest_apk(DIST), _newest_apk(DIST / 'beta')
 
 
 def main():
@@ -334,7 +344,7 @@ def main():
         beta_changelog_html = ''
         beta_date = ''
     html_out = (template
-            .replace('__CHANNEL__', 'Public Beta' if 'PB' in (info.get('versionName') or '') else '안정')
+            .replace('__CHANNEL__', '정식')
             .replace('__MAIN_DATE__', main_date or '-')
             .replace('__MAIN_VERSION__', version)
             .replace('__MAIN_VERSION_NAME__', info.get('versionName') or '-')
@@ -367,8 +377,13 @@ def main():
     (PUBLIC / 'index.html').write_text(html_out, encoding='utf-8')
     (PUBLIC / 'robots.txt').write_text('User-agent: *\nAllow: /\n', encoding='utf-8')
 
-    # ── OTA version.json ───────────────────────────────────────
+    # ── OTA version.json (정식) ─────────────────────────────────
     ota = write_ota_json(apk, info, args.site_url)
+
+    # ── OTA beta-version.json (배타) ────────────────────────────
+    if beta is not None:
+        bota = write_ota_json(beta, binfo, args.site_url, 'beta-version.json')
+        print(f'  OTA(beta)  : {args.site_url.rstrip("/")}/ota/beta-version.json  (versionCode {bota["versionCode"]})')
 
     # ── 릴리즈노트 전체 목록(앱 릴리즈노트 화면용) ──────────────
     notes = write_release_notes_json(args.site_url)

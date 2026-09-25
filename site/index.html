@@ -65,6 +65,7 @@
   .meta { color: var(--muted-2); font-size: .8rem; margin-top: 1.3rem; }
   .meta a { color: var(--accent); text-decoration: none; }
   .meta a:hover { text-decoration: underline; }
+  .meta.dev { font-size: .72rem; margin-top: .5rem; opacity: .8; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
   .hash { word-break: break-all; }
   .hidden { display: none !important; }
@@ -80,14 +81,15 @@
 
     <div class="cta">
       <a class="btn" href="__MAIN_APK__">
-        <span class="txt">다운로드<small>__CHANNEL__ · __MAIN_VERSION__ · __MAIN_SIZE__ MB · __MAIN_DATE__</small></span>
+        <span class="txt">정식 다운로드<small>__CHANNEL__ · __MAIN_VERSION_NAME__ · __MAIN_SIZE__ MB · __MAIN_DATE__</small></span>
       </a>
       <a class="btn ghost __BETA_HIDDEN__" href="__BETA_APK__">
-        <span class="txt">배타 다운로드<small>__BETA_VERSION__ · __BETA_SIZE__ MB · __BETA_DATE__</small></span>
+        <span class="txt">배타 다운로드<small>배타 · __BETA_VERSION_NAME__ · __BETA_SIZE__ MB · __BETA_DATE__</small></span>
       </a>
     </div>
 
     <p class="meta">Android 9 (API 28) 이상 · <a href="https://github.com/KJournal" target="_blank" rel="noopener">GitHub</a></p>
+    <p class="meta dev">개발: 정병이, 은하</p>
   </div>
 </div>
 
