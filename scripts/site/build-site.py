@@ -356,7 +356,8 @@ def main():
         beta_changelog_html = ''
         beta_date = ''
     html_out = (template
-            .replace('__CHANNEL__', '정식')
+            # PB(공개 배타) 빌드는 '정식'으로 표기하지 않는다. 정식 릴리즈(5.0 등)만 '정식'.
+            .replace('__CHANNEL__', '배타' if 'PB' in (info.get('versionName') or '') else '정식')
             .replace('__MAIN_DATE__', main_date or '-')
             .replace('__MAIN_VERSION__', version)
             .replace('__MAIN_VERSION_NAME__', info.get('versionName') or '-')
