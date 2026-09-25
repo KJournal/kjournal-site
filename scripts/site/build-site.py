@@ -84,9 +84,20 @@ def repo_fingerprint():
     return m.group(1).strip().upper() if m else ''
 
 
-def changelog_for(apk, version_code):
+PKG = 'com.jiwxn3.KJournal'
+METADATA_STABLE = FDROID_DIR / 'metadata' / PKG
+METADATA_BETA = FDROID_DIR / 'metadata-beta' / PKG
+
+
+def _metadata_dir(channel):
+    """채널별 changelog 메타데이터 폴더. 정식=F-Droid 게시본, 배타=별도."""
+    return METADATA_BETA if channel == 'beta' else METADATA_STABLE
+
+
+def changelog_for(apk, version_code, channel='stable'):
+    base = _metadata_dir(channel)
     for loc in ('ko', 'en-US'):
-        f = FDROID_DIR / 'metadata' / 'com.jiwxn3.KJournal' / loc / 'changelogs' / f'{version_code}.txt'
+        f = base / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
             text = f.read_text(encoding='utf-8').strip()
             # 날짜 줄과 '변경' 류 머리말은 본문에서 제외
@@ -97,9 +108,10 @@ def changelog_for(apk, version_code):
     return '버그 수정 및 안정성 개선'
 
 
-def changelog_date_for(version_code):
+def changelog_date_for(version_code, channel='stable'):
+    base = _metadata_dir(channel)
     for loc in ('ko', 'en-US'):
-        f = FDROID_DIR / 'metadata' / 'com.jiwxn3.KJournal' / loc / 'changelogs' / f'{version_code}.txt'
+        f = base / loc / 'changelogs' / f'{version_code}.txt'
         if f.is_file():
             d = changelog_date(f.read_text(encoding='utf-8'))
             if d:
@@ -185,15 +197,17 @@ def ota_hold_version_code():
     return None
 
 
-def write_ota_json(apk, info, site_url, filename='version.json'):
-    """앱 OTA(check) 가 읽는 version.json(또는 beta-version.json) 을 만든다."""
+def write_ota_json(apk, info, site_url, filename='version.json', channel='stable'):
+    """앱 OTA(check) 가 읽는 version.json(정식) / beta-version.json(배타) 을 만든다."""
     vcode = int(info.get('versionCode') or 0)
+    # 홀드는 정식 채널에만 적용한다(배타는 홀드 없이 최신 배타를 안내).
+    hold = ota_hold_version_code() if channel == 'stable' else None
     doc = {
-        'versionCode': ota_hold_version_code() or vcode,
+        'versionCode': hold or vcode,
         'versionName': info.get('versionName') or '',
-        'date': changelog_date_for(vcode),
+        'date': changelog_date_for(vcode, channel),
         'downloadUrl': f"{site_url.rstrip('/')}/apk/{apk.name}",
-        'changelog': with_site_link(changelog_for(apk, vcode), site_url),
+        'changelog': with_site_link(changelog_for(apk, vcode, channel), site_url),
         'sha256': sha256(apk).lower(),
     }
     outdir = PUBLIC / 'ota'
@@ -203,12 +217,12 @@ def write_ota_json(apk, info, site_url, filename='version.json'):
     return doc
 
 
-def write_release_notes_json(site_url):
-    """앱 릴리즈노트 화면이 읽는 전체 버전 노트 목록(ota/release-notes.json)."""
-    pkg = 'com.jiwxn3.KJournal'
+def write_release_notes_json(site_url, channel='stable', filename='release-notes.json'):
+    """앱 릴리즈노트 화면이 읽는 버전 노트 목록을 채널별로 만든다."""
+    base = _metadata_dir(channel)
     entries, seen = [], set()
     for loc in ('ko', 'en-US'):
-        cdir = FDROID_DIR / 'metadata' / pkg / loc / 'changelogs'
+        cdir = base / loc / 'changelogs'
         if not cdir.is_dir():
             continue
         for f in sorted(cdir.glob('*.txt')):
@@ -233,10 +247,8 @@ def write_release_notes_json(site_url):
     entries.sort(key=lambda x: x['versionCode'], reverse=True)
     outdir = PUBLIC / 'ota'
     outdir.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(entries, ensure_ascii=False, indent=2) + '\n'
-    # 정식/배타 채널이 서로 다른 릴리즈노트 엔드포인트를 본다.
-    (outdir / 'release-notes.json').write_text(payload, encoding='utf-8')
-    (outdir / 'beta-release-notes.json').write_text(payload, encoding='utf-8')
+    (outdir / filename).write_text(
+        json.dumps(entries, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     return entries
 
 
@@ -378,15 +390,16 @@ def main():
     (PUBLIC / 'robots.txt').write_text('User-agent: *\nAllow: /\n', encoding='utf-8')
 
     # ── OTA version.json (정식) ─────────────────────────────────
-    ota = write_ota_json(apk, info, args.site_url)
+    ota = write_ota_json(apk, info, args.site_url, 'version.json', 'stable')
 
     # ── OTA beta-version.json (배타) ────────────────────────────
     if beta is not None:
-        bota = write_ota_json(beta, binfo, args.site_url, 'beta-version.json')
+        bota = write_ota_json(beta, binfo, args.site_url, 'beta-version.json', 'beta')
         print(f'  OTA(beta)  : {args.site_url.rstrip("/")}/ota/beta-version.json  (versionCode {bota["versionCode"]})')
 
-    # ── 릴리즈노트 전체 목록(앱 릴리즈노트 화면용) ──────────────
-    notes = write_release_notes_json(args.site_url)
+    # ── 릴리즈노트 목록(정식/배타 분리) ─────────────────────────
+    notes = write_release_notes_json(args.site_url, 'stable', 'release-notes.json')
+    write_release_notes_json(args.site_url, 'beta', 'beta-release-notes.json')
     print(f'릴리즈노트 {len(notes)}개 버전: ' + ', '.join(str(n["versionCode"]) for n in notes[:6]))
 
     # ── F-Droid 커스텀 저장소 ───────────────────────────────────
