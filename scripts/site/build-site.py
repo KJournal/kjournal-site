@@ -90,7 +90,7 @@ METADATA_BETA = FDROID_DIR / 'metadata-beta' / PKG
 
 
 def _metadata_dir(channel):
-    """채널별 changelog 메타데이터 폴더. 정식=F-Droid 게시본, 배타=별도."""
+    """채널별 changelog 메타데이터 폴더. 정식=`metadata`(F-Droid 게시본), 배타=`metadata-beta`."""
     return METADATA_BETA if channel == 'beta' else METADATA_STABLE
 
 
