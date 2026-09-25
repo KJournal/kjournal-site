@@ -347,6 +347,8 @@ def main():
     fingerprint = repo_fingerprint()
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
+    # '정식' 슬롯에는 공식 릴리즈(예: 5.0)만 노출한다. PB 빌드는 배타로 취급해 정식 버튼을 숨긴다.
+    stable_official = 'PB' not in (info.get('versionName') or '')
     changelog_html = render_changelog(changelog_for(apk, info.get('versionCode')))
     main_date = changelog_date_for(info.get('versionCode'))
     if beta is not None:
@@ -374,6 +376,7 @@ def main():
             .replace('__BETA_SHA256__', bdigest)
             .replace('__BETA_CHANGELOG__', beta_changelog_html)
             .replace('__BETA_HIDDEN__', '' if beta is not None else 'hidden')
+            .replace('__MAIN_HIDDEN__', '' if stable_official else 'hidden')
             # 레거시 토큰(단일 APK 템플릿 호환) — 메인 기준
             .replace('__VERSION__', version)
             .replace('__VERSION_NAME__', info.get('versionName') or '-')
