@@ -238,6 +238,10 @@ def write_release_notes_json(site_url, channel='stable', filename='release-notes
             if lines and lines[0].lower().startswith('kjournal'):
                 name = lines[0][len('KJournal'):].strip()
                 lines = lines[1:]
+            # 정식 채널은 PB 로그를 싹 빼고 정식 릴리즈만, 배타 채널은 PB 로그만 노출한다.
+            is_pb = 'PB' in name.upper()
+            if (channel == 'stable' and is_pb) or (channel == 'beta' and not is_pb):
+                continue
             lines = [(l[2:].strip() if l.startswith('- ') else l) for l in lines]
             for line in link_lines(site_url):
                 if not any(l.strip() == line for l in lines):
