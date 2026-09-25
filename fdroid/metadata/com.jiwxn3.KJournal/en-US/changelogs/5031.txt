@@ -1,0 +1,12 @@
+KJournal 5.0
+
+날짜: 2026-09-25
+
+변경
+- OTA: 설치 화면이 APK를 읽지 못하던 문제를 수정했습니다(FileProvider 경로 설정).
+- OTA: 설치 안내가 오탐 '네트워크 확인' 오류/앱 종료를 일으키던 문제를 수정했습니다.
+- OTA: 다운로드 커넥션 재사용을 방지하고 실패 시 재시도합니다.
+- 번역: 통계 타임라인/타임라인 정보 화면의 남은 영어 문구를 한글로 번역했습니다.
+- 이전 버전(5 PB8.5) 변경 사항을 포함합니다.
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
