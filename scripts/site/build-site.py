@@ -356,8 +356,8 @@ def main():
     changelog_html = render_changelog(changelog_for(apk, info.get('versionCode')))
     main_date = changelog_date_for(info.get('versionCode'))
     if beta is not None:
-        beta_changelog_html = render_changelog(changelog_for(beta, binfo.get('versionCode')))
-        beta_date = changelog_date_for(binfo.get('versionCode'))
+        beta_changelog_html = render_changelog(changelog_for(beta, binfo.get('versionCode'), 'beta'))
+        beta_date = changelog_date_for(binfo.get('versionCode'), 'beta')
     else:
         beta_changelog_html = ''
         beta_date = ''
