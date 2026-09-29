@@ -69,6 +69,25 @@
   code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
   .hash { word-break: break-all; }
   .hidden { display: none !important; }
+
+  .tabs {
+    display: inline-flex; gap: .25rem; padding: .28rem; margin-top: 1.7rem;
+    border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03);
+  }
+  .tab {
+    appearance: none; -webkit-appearance: none; border: 0; cursor: pointer; font: inherit;
+    font-weight: 700; font-size: .9rem; color: var(--muted); background: transparent;
+    padding: .5rem 1.15rem; border-radius: 999px;
+    transition: color .12s ease, background .12s ease;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab.is-active {
+    color: #fff; background: linear-gradient(135deg, var(--accent), #5f6ef0 60%, #4a58dd);
+    box-shadow: 0 8px 22px rgba(95,110,240,.28);
+  }
+  .panel { margin-top: 0; }
+  .panel .cta { margin-top: 1.6rem; }
+  .note { color: var(--muted); font-size: .82rem; margin: 1.1rem auto 0; max-width: 30rem; }
 </style>
 </head>
 <body>
@@ -79,19 +98,62 @@
     <h1 class="title">KJournal</h1>
     <p class="tagline">Your timeline, your record.</p>
 
-    <div class="cta">
-      <a class="btn __MAIN_HIDDEN__" href="__MAIN_APK__">
-        <span class="txt">__CHANNEL__ 다운로드<small>__CHANNEL__ · __MAIN_VERSION_NAME__ · __MAIN_SIZE__ MB · __MAIN_DATE__</small></span>
-      </a>
-      <a class="btn ghost __BETA_HIDDEN__" href="__BETA_APK__">
-        <span class="txt">배타 다운로드<small>배타 · __BETA_VERSION_NAME__ · __BETA_SIZE__ MB · __BETA_DATE__</small></span>
-      </a>
+    <div class="tabs" role="tablist" aria-label="플랫폼">
+      <button class="tab is-active" id="tab-android" role="tab" aria-selected="true" aria-controls="panel-android" data-panel="android">Android</button>
+      <button class="tab __IOS_HIDDEN__" id="tab-ios" role="tab" aria-selected="false" aria-controls="panel-ios" data-panel="ios">iOS</button>
     </div>
 
-    <p class="meta">Android 9 (API 28) 이상 · <a href="https://github.com/KJournal" target="_blank" rel="noopener">GitHub</a></p>
+    <section class="panel" id="panel-android" role="tabpanel" aria-labelledby="tab-android">
+      <div class="cta">
+        <a class="btn __MAIN_HIDDEN__" href="__MAIN_APK__">
+          <span class="txt">__CHANNEL__ 다운로드<small>__CHANNEL__ · __MAIN_VERSION_NAME__ · __MAIN_SIZE__ MB · __MAIN_DATE__</small></span>
+        </a>
+        <a class="btn ghost __BETA_HIDDEN__" href="__BETA_APK__">
+          <span class="txt">배타 다운로드<small>배타 · __BETA_VERSION_NAME__ · __BETA_SIZE__ MB · __BETA_DATE__</small></span>
+        </a>
+      </div>
+      <p class="meta">Android 9 (API 28) 이상 · <a href="https://github.com/KJournal/KJournal-Android" target="_blank" rel="noopener">GitHub</a></p>
+    </section>
+
+    <section class="panel hidden" id="panel-ios" role="tabpanel" aria-labelledby="tab-ios">
+      <div class="cta">
+        <a class="btn" href="__IOS_IPA__">
+          <span class="txt">iOS 다운로드<small>iOS · __IOS_VERSION_NAME__ · __IOS_SIZE__ MB · __IOS_DATE__</small></span>
+        </a>
+        <a class="btn ghost" href="__IOS_RELEASE_URL__" target="_blank" rel="noopener">
+          <span class="txt">GitHub 릴리즈<small>__IOS_FILE__ · 서명 없음</small></span>
+        </a>
+      </div>
+      <p class="meta">iOS 16.2 이상</p>
+      <p class="note">서명되지 않은 IPA 입니다. 설치하려면 Sideloadly·AltStore 로 본인 인증서로 재서명하세요.</p>
+    </section>
+
     <p class="meta dev">개발: 정병이, 은하</p>
   </div>
 </div>
+
+<script>
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var panels = {
+      android: document.getElementById('panel-android'),
+      ios: document.getElementById('panel-ios')
+    };
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var name = tab.getAttribute('data-panel');
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        Object.keys(panels).forEach(function (k) {
+          if (panels[k]) { panels[k].classList.toggle('hidden', k !== name); }
+        });
+      });
+    });
+  })();
+</script>
 
 </body>
 </html>

@@ -5,5 +5,6 @@
 *.html text eol=lf
 *.json text eol=lf
 *.apk  binary
+*.ipa  binary
 *.jar  binary
 *.png  binary

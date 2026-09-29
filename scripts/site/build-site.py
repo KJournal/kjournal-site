@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""site/ 템플릿 + dist/ APK 로 GitHub Pages 배포용 public/ 을 조립한다.
+"""site/ 템플릿 + dist/ APK·IPA 로 GitHub Pages 배포용 public/ 을 조립한다.
 
-    public/index.html                 다운로드 페이지
+    public/index.html                 다운로드 페이지 (Android / iOS 탭)
     public/<apk 파일명>                APK
     public/apk/<apk 파일명>            APK (OTA 다운로드 경로)
+    public/ios/<ipa 파일명>            iOS IPA (서명 없음)
     public/ota/version.json           OTA 업데이트 정보
     public/icon.png                   앱 아이콘
     public/robots.txt
@@ -11,6 +12,7 @@
 
 사용:
     python3 scripts/site/build-site.py [--apk dist/KJournal-5-PB6.apk] [--version "5 PB6"]
+                                       [--ios-ipa dist/ios/KJournal-5.0-PB1-ios.ipa]
                                        [--repo-url https://kjournal.github.io/kjournal-site/fdroid/repo]
                                        [--site-url https://kjournal.github.io/kjournal-site]
 """
@@ -28,6 +30,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 PUBLIC = ROOT / 'public'
 SITE = ROOT / 'site'
 DIST = ROOT / 'dist'
+IOS_DIR = DIST / 'ios'
 FDROID_DIR = ROOT / 'fdroid'
 sys.path.insert(0, str(ROOT / 'scripts' / 'ci'))
 sys.path.insert(0, str(ROOT / 'scripts' / 'fdroid'))
@@ -39,9 +42,11 @@ except Exception:
     pass
 
 from apk_info import parse_apk  # noqa: E402
+from ipa_info import parse_ipa  # noqa: E402
 
 DEFAULT_SITE = 'https://kjournal.github.io/kjournal-site'
 DEFAULT_REPO = DEFAULT_SITE + '/fdroid/repo'
+IOS_REPO_URL = 'https://github.com/KJournal/KJournal-iOS'
 
 
 def sha256(path):
@@ -282,6 +287,20 @@ def _default_channels():
     return _newest_apk(DIST), _newest_apk(DIST / 'beta')
 
 
+def _newest_ipa(folder=IOS_DIR):
+    """최신 iOS IPA 를 고른다(없으면 None). iOS 는 서명 없는 IPA 한 종류만 둔다."""
+    if not folder.is_dir():
+        return None
+    ipas = sorted(folder.glob('*.ipa'))
+    return ipas[-1] if ipas else None
+
+
+def _ios_release_url(version_name):
+    """iOS 릴리즈 태그 주소. 예: `5.0 PB1` → .../releases/tag/v5.0-PB1-ios"""
+    label = version_name.strip().replace(' ', '-')
+    return f'{IOS_REPO_URL}/releases/tag/v{label}-ios'
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--apk', default=None, help='(레거시) 단일 APK — 지정 시 메인으로 사용')
@@ -289,6 +308,8 @@ def main():
     ap.add_argument('--beta-apk', default=None, help='배타(테스트) 다운로드 APK')
     ap.add_argument('--version', default=None, help='메인 표시 버전 라벨 (기본: APK 파일명 기반)')
     ap.add_argument('--beta-version', default=None, help='배타 표시 버전 라벨 (기본: APK 파일명 기반)')
+    ap.add_argument('--ios-ipa', default=None,
+                    help='iOS 다운로드 IPA (기본: dist/ios/*.ipa 최신, 없으면 iOS 탭 숨김)')
     ap.add_argument('--repo-url', default=DEFAULT_REPO)
     ap.add_argument('--site-url', default=DEFAULT_SITE)
     ap.add_argument('--skip-index', action='store_true', help='F-Droid 저장소 생성을 건너뛴다')
@@ -315,10 +336,27 @@ def main():
     if beta is not None and beta.resolve() == apk.resolve():
         beta = None
 
+    ios = pathlib.Path(args.ios_ipa) if args.ios_ipa else _newest_ipa()
+    if ios is not None and not ios.is_file():
+        print(f'iOS IPA 를 찾을 수 없습니다: {ios}', file=sys.stderr)
+        return 1
+
     info = parse_apk(apk)
     version = args.version or apk.stem.replace('KJournal-', '')
     digest = sha256(apk)
     size_mb = f'{apk.stat().st_size / (1024 * 1024):.1f}'
+
+    if ios is not None:
+        ios_info = parse_ipa(ios)
+        ios_version = (ios_info.get('versionName')
+                       or ios.stem.replace('KJournal-', '').removesuffix('-ios'))
+        ios_digest = sha256(ios)
+        ios_size_mb = f'{ios.stat().st_size / (1024 * 1024):.1f}'
+        ios_date = ios_info.get('date') or '-'
+        ios_release_url = _ios_release_url(ios_version)
+    else:
+        ios_info, ios_version, ios_digest, ios_size_mb, ios_date, ios_release_url = \
+            {}, '', '', '', '', ''
 
     if beta is not None:
         binfo = parse_apk(beta)
@@ -343,6 +381,10 @@ def main():
         bdst = PUBLIC / 'apk' / beta.name
         if not bdst.exists():
             shutil.copy2(beta, bdst)
+
+    if ios is not None:
+        (PUBLIC / 'ios').mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ios, PUBLIC / 'ios' / ios.name)
 
     icon = FDROID_DIR / 'icon.png'
     if icon.is_file():
@@ -381,6 +423,17 @@ def main():
             .replace('__BETA_CHANGELOG__', beta_changelog_html)
             .replace('__BETA_HIDDEN__', '' if beta is not None else 'hidden')
             .replace('__MAIN_HIDDEN__', '' if stable_official else 'hidden')
+            # iOS 탭 (dist/ios/*.ipa 가 없으면 탭 숨김)
+            .replace('__IOS_HIDDEN__', '' if ios is not None else 'hidden')
+            .replace('__IOS_IPA__', ('ios/' + ios.name) if ios is not None else '')
+            .replace('__IOS_FILE__', ios.name if ios is not None else '')
+            .replace('__IOS_VERSION__', ios_version)
+            .replace('__IOS_VERSION_NAME__', ios_info.get('versionName') or '-')
+            .replace('__IOS_VERSION_CODE__', ios_info.get('versionCode') or '-')
+            .replace('__IOS_SIZE__', ios_size_mb)
+            .replace('__IOS_SHA256__', ios_digest)
+            .replace('__IOS_DATE__', ios_date)
+            .replace('__IOS_RELEASE_URL__', ios_release_url)
             # 레거시 토큰(단일 APK 템플릿 호환) — 메인 기준
             .replace('__VERSION__', version)
             .replace('__VERSION_NAME__', info.get('versionName') or '-')
@@ -422,6 +475,8 @@ def main():
 
     print('public/ 준비 완료')
     print(f'  APK        : {apk.name} ({size_mb} MB)')
+    if ios is not None:
+        print(f'  iOS IPA    : ios/{ios.name} ({ios_size_mb} MB) — 버전 {ios_version} / {ios_date}')
     print(f'  버전       : {version} (versionCode {info.get("versionCode")})')
     print(f'  SHA256     : {digest}')
     print(f'  사이트     : {args.site_url.rstrip("/")}')
