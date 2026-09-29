@@ -46,7 +46,6 @@ from ipa_info import parse_ipa  # noqa: E402
 
 DEFAULT_SITE = 'https://kjournal.github.io/kjournal-site'
 DEFAULT_REPO = DEFAULT_SITE + '/fdroid/repo'
-IOS_REPO_URL = 'https://github.com/KJournal/KJournal-iOS'
 
 
 def sha256(path):
@@ -295,12 +294,6 @@ def _newest_ipa(folder=IOS_DIR):
     return ipas[-1] if ipas else None
 
 
-def _ios_release_url(version_name):
-    """iOS 릴리즈 태그 주소. 예: `5.0 PB1` → .../releases/tag/v5.0-PB1-ios"""
-    label = version_name.strip().replace(' ', '-')
-    return f'{IOS_REPO_URL}/releases/tag/v{label}-ios'
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--apk', default=None, help='(레거시) 단일 APK — 지정 시 메인으로 사용')
@@ -353,10 +346,8 @@ def main():
         ios_digest = sha256(ios)
         ios_size_mb = f'{ios.stat().st_size / (1024 * 1024):.1f}'
         ios_date = ios_info.get('date') or '-'
-        ios_release_url = _ios_release_url(ios_version)
     else:
-        ios_info, ios_version, ios_digest, ios_size_mb, ios_date, ios_release_url = \
-            {}, '', '', '', '', ''
+        ios_info, ios_version, ios_digest, ios_size_mb, ios_date = {}, '', '', '', ''
 
     if beta is not None:
         binfo = parse_apk(beta)
@@ -426,14 +417,12 @@ def main():
             # iOS 탭 (dist/ios/*.ipa 가 없으면 탭 숨김)
             .replace('__IOS_HIDDEN__', '' if ios is not None else 'hidden')
             .replace('__IOS_IPA__', ('ios/' + ios.name) if ios is not None else '')
-            .replace('__IOS_FILE__', ios.name if ios is not None else '')
             .replace('__IOS_VERSION__', ios_version)
             .replace('__IOS_VERSION_NAME__', ios_info.get('versionName') or '-')
             .replace('__IOS_VERSION_CODE__', ios_info.get('versionCode') or '-')
             .replace('__IOS_SIZE__', ios_size_mb)
             .replace('__IOS_SHA256__', ios_digest)
             .replace('__IOS_DATE__', ios_date)
-            .replace('__IOS_RELEASE_URL__', ios_release_url)
             # 레거시 토큰(단일 APK 템플릿 호환) — 메인 기준
             .replace('__VERSION__', version)
             .replace('__VERSION_NAME__', info.get('versionName') or '-')
