@@ -1,0 +1,8 @@
+KJournal 5 PB8.10
+
+날짜: 2026-10-02
+
+수정
+- 배타 채널에서 일부 UI 문구가 영문으로 표시되던 문제를 수정했습니다. 설정/환경설정, 타임라인/FAQ, 안전사용 가이드, 복용량 안내, 경험 편집, 사용자 정의 단위 등 113개 항목을 한국어로 적용했습니다.
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
