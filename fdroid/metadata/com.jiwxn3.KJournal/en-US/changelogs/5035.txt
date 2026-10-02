@@ -1,0 +1,9 @@
+KJournal 5.3
+
+날짜: 2026-10-02
+
+신기능
+- 배타 채널의 변경사항을 정식 채널로 통합했습니다.
+- 미번역으로 남아 있던 UI 문구를 한국어로 적용했습니다. (복용량 등급/용량 라벨, FAQ, 안전사용 가이드, 경험 편집, 사용자 단위, 약물검사 국가 등)
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
