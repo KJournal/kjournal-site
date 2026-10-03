@@ -91,11 +91,16 @@ def repo_fingerprint():
 PKG = 'com.jiwxn3.KJournal'
 METADATA_STABLE = FDROID_DIR / 'metadata' / PKG
 METADATA_BETA = FDROID_DIR / 'metadata-beta' / PKG
+METADATA_ALPHA = FDROID_DIR / 'metadata-alpha' / PKG
 
 
 def _metadata_dir(channel):
-    """채널별 changelog 메타데이터 폴더. 정식=`metadata`(F-Droid 게시본), 배타=`metadata-beta`."""
-    return METADATA_BETA if channel == 'beta' else METADATA_STABLE
+    """채널별 changelog 메타데이터 폴더. 정식=`metadata`(F-Droid 게시본), 배타=`metadata-beta`, 알파=`metadata-alpha`."""
+    if channel == 'beta':
+        return METADATA_BETA
+    if channel == 'alpha':
+        return METADATA_ALPHA
+    return METADATA_STABLE
 
 
 def changelog_for(apk, version_code, channel='stable'):
@@ -242,10 +247,19 @@ def write_release_notes_json(site_url, channel='stable', filename='release-notes
             if lines and lines[0].lower().startswith('kjournal'):
                 name = lines[0][len('KJournal'):].strip()
                 lines = lines[1:]
-            # 정식 채널은 PB 로그를 싹 빼고 정식 릴리즈만, 배타 채널은 PB 로그만 노출한다.
-            is_pb = 'PB' in name.upper()
-            if (channel == 'stable' and is_pb) or (channel == 'beta' and not is_pb):
-                continue
+            # 정식=정식 릴리즈만(PB/Alpha 제외), 배타=PB만, 알파=Alpha만 노출한다.
+            upper = name.upper()
+            is_pb = 'PB' in upper
+            is_alpha = 'ALPHA' in upper
+            if channel == 'stable':
+                if is_pb or is_alpha:
+                    continue
+            elif channel == 'beta':
+                if not is_pb:
+                    continue
+            elif channel == 'alpha':
+                if not is_alpha:
+                    continue
             lines = [(l[2:].strip() if l.startswith('- ') else l) for l in lines]
             for line in link_lines(site_url):
                 if not any(l.strip() == line for l in lines):
@@ -282,8 +296,9 @@ def _default_channels():
 
     - 정식(메인): `dist/*.apk` 중 versionCode 최고
     - 배타: `dist/beta/*.apk` 중 versionCode 최고 (없으면 배타 버튼 숨김)
+    - 알파: `dist/alpha/*.apk` 중 versionCode 최고 (없으면 알파 버튼 숨김)
     """
-    return _newest_apk(DIST), _newest_apk(DIST / 'beta')
+    return (_newest_apk(DIST), _newest_apk(DIST / 'beta'), _newest_apk(DIST / 'alpha'))
 
 
 def _newest_ipa(folder=IOS_DIR):
@@ -301,6 +316,8 @@ def main():
     ap.add_argument('--beta-apk', default=None, help='배타(테스트) 다운로드 APK')
     ap.add_argument('--version', default=None, help='메인 표시 버전 라벨 (기본: APK 파일명 기반)')
     ap.add_argument('--beta-version', default=None, help='배타 표시 버전 라벨 (기본: APK 파일명 기반)')
+    ap.add_argument('--alpha-apk', default=None, help='알파(alpha) 다운로드 APK')
+    ap.add_argument('--alpha-version', default=None, help='알파 표시 버전 라벨 (기본: APK 파일명 기반)')
     ap.add_argument('--ios-ipa', default=None,
                     help='iOS 다운로드 IPA (기본: dist/ios/*.ipa 최신, 없으면 iOS 탭 숨김)')
     ap.add_argument('--repo-url', default=DEFAULT_REPO)
@@ -312,9 +329,11 @@ def main():
     if explicit_main:
         apk = pathlib.Path(explicit_main)
         beta = pathlib.Path(args.beta_apk) if args.beta_apk else None
+        alpha = pathlib.Path(args.alpha_apk) if args.alpha_apk else None
     else:
-        apk, default_beta = _default_channels()
+        apk, default_beta, default_alpha = _default_channels()
         beta = pathlib.Path(args.beta_apk) if args.beta_apk else default_beta
+        alpha = pathlib.Path(args.alpha_apk) if args.alpha_apk else default_alpha
 
     if apk is None:
         print('dist/ 에 APK 가 없습니다.', file=sys.stderr)
@@ -328,6 +347,13 @@ def main():
         return 1
     if beta is not None and beta.resolve() == apk.resolve():
         beta = None
+    if alpha is not None and not alpha.is_file():
+        print(f'알파 APK 를 찾을 수 없습니다: {alpha}', file=sys.stderr)
+        return 1
+    if alpha is not None and alpha.resolve() == apk.resolve():
+        alpha = None
+    if beta is not None and alpha is not None and beta.resolve() == alpha.resolve():
+        alpha = None
 
     ios = pathlib.Path(args.ios_ipa) if args.ios_ipa else _newest_ipa()
     if ios is not None and not ios.is_file():
@@ -357,6 +383,14 @@ def main():
     else:
         binfo, bversion, bdigest, bsize_mb = {}, '', '', ''
 
+    if alpha is not None:
+        ainfo = parse_apk(alpha)
+        aversion = args.alpha_version or alpha.stem.replace('KJournal-', '')
+        adigest = sha256(alpha)
+        asize_mb = f'{alpha.stat().st_size / (1024 * 1024):.1f}'
+    else:
+        ainfo, aversion, adigest, asize_mb = {}, '', '', ''
+
     if PUBLIC.exists():
         shutil.rmtree(PUBLIC)
     PUBLIC.mkdir(parents=True)
@@ -372,6 +406,13 @@ def main():
         bdst = PUBLIC / 'apk' / beta.name
         if not bdst.exists():
             shutil.copy2(beta, bdst)
+
+    if alpha is not None:
+        if not (PUBLIC / alpha.name).exists():
+            shutil.copy2(alpha, PUBLIC / alpha.name)
+        adst = PUBLIC / 'apk' / alpha.name
+        if not adst.exists():
+            shutil.copy2(alpha, adst)
 
     if ios is not None:
         (PUBLIC / 'ios').mkdir(parents=True, exist_ok=True)
@@ -394,6 +435,12 @@ def main():
     else:
         beta_changelog_html = ''
         beta_date = ''
+    if alpha is not None:
+        alpha_changelog_html = render_changelog(changelog_for(alpha, ainfo.get('versionCode'), 'alpha'))
+        alpha_date = changelog_date_for(ainfo.get('versionCode'), 'alpha')
+    else:
+        alpha_changelog_html = ''
+        alpha_date = ''
     html_out = (template
             # PB(공개 배타) 빌드는 '정식'으로 표기하지 않는다. 정식 릴리즈(5.0 등)만 '정식'.
             .replace('__CHANNEL__', '배타' if 'PB' in (info.get('versionName') or '') else '정식')
@@ -413,6 +460,15 @@ def main():
             .replace('__BETA_SHA256__', bdigest)
             .replace('__BETA_CHANGELOG__', beta_changelog_html)
             .replace('__BETA_HIDDEN__', '' if beta is not None else 'hidden')
+            .replace('__ALPHA_DATE__', alpha_date or '-')
+            .replace('__ALPHA_VERSION__', aversion)
+            .replace('__ALPHA_VERSION_NAME__', ainfo.get('versionName') or '-')
+            .replace('__ALPHA_VERSION_CODE__', ainfo.get('versionCode') or '-')
+            .replace('__ALPHA_APK__', alpha.name if alpha is not None else '')
+            .replace('__ALPHA_SIZE__', asize_mb)
+            .replace('__ALPHA_SHA256__', adigest)
+            .replace('__ALPHA_CHANGELOG__', alpha_changelog_html)
+            .replace('__ALPHA_HIDDEN__', '' if alpha is not None else 'hidden')
             .replace('__MAIN_HIDDEN__', '' if stable_official else 'hidden')
             # iOS 탭 (dist/ios/*.ipa 가 없으면 탭 숨김)
             .replace('__IOS_HIDDEN__', '' if ios is not None else 'hidden')
@@ -447,9 +503,15 @@ def main():
         bota = write_ota_json(beta, binfo, args.site_url, 'beta-version.json', 'beta')
         print(f'  OTA(beta)  : {args.site_url.rstrip("/")}/ota/beta-version.json  (versionCode {bota["versionCode"]})')
 
-    # ── 릴리즈노트 목록(정식/배타 분리) ─────────────────────────
+    # ── OTA alpha-version.json (알파) ───────────────────────────
+    if alpha is not None:
+        aota = write_ota_json(alpha, ainfo, args.site_url, 'alpha-version.json', 'alpha')
+        print(f'  OTA(alpha) : {args.site_url.rstrip("/")}/ota/alpha-version.json  (versionCode {aota["versionCode"]})')
+
+    # ── 릴리즈노트 목록(정식/배타/알파 분리) ─────────────────────
     notes = write_release_notes_json(args.site_url, 'stable', 'release-notes.json')
     write_release_notes_json(args.site_url, 'beta', 'beta-release-notes.json')
+    write_release_notes_json(args.site_url, 'alpha', 'alpha-release-notes.json')
     print(f'릴리즈노트 {len(notes)}개 버전: ' + ', '.join(str(n["versionCode"]) for n in notes[:6]))
 
     # ── F-Droid 커스텀 저장소 ───────────────────────────────────
