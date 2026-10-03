@@ -1,0 +1,11 @@
+KJournal 5 Alpha 1
+
+- 알파 채널(com.jiwxn3.KJournal.alpha) 출시
+- CI/CD 재작성: build/test/publish 분리, PR 머지 시 사이트 자동배포 + 채널별 릴리스노트
+- menhera.network 위키 진입 시 운영 일시 중단 안내
+- 워치페이스 그래프 비율/링 게이지 개선, 알림·앱 그래프 색 통일, 피크까지 남은 %·활성 물질 수 표시
+- 버전 파서(libs.versions 간접참조)·OtaUpdater 알파 엔드포인트·채널 프로퍼티 지원
+- 코드 난독화 비활성
+
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
