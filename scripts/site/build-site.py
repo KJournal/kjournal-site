@@ -422,6 +422,16 @@ def main():
     if icon.is_file():
         shutil.copy2(icon, PUBLIC / 'icon.png')
 
+    # 워치페이스 WFF APK/토큰. 앱에 내장하면 One UI 설치 스캐너가 '드로퍼'로 오탐해
+    # OTA 설치가 차단되므로, 사이트에서 지연 다운로드하도록 여기서 공개한다.
+    wf_src = ROOT / 'watchface'
+    if wf_src.is_dir():
+        wf_dst = PUBLIC / 'watchface'
+        wf_dst.mkdir(parents=True, exist_ok=True)
+        for f in sorted(wf_src.iterdir()):
+            if f.is_file():
+                shutil.copy2(f, wf_dst / f.name)
+
     fingerprint = repo_fingerprint()
 
     template = (SITE / 'index.html').read_text(encoding='utf-8')
