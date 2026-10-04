@@ -9,3 +9,5 @@ KJournal 5 Alpha 1
 
 GitHub: https://github.com/KJournal
 사이트: https://kjournal.github.io/kjournal-site/
+
+날짜: 2026-10-04
