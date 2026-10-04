@@ -1,0 +1,12 @@
+KJournal 5 Alpha 1.2
+
+- 워치페이스 추가 시 워치가 멈추던 문제 수정(KA-29)
+  - 설치 실패 후 update 재시도가 이미 EOF 인 파일 디스크립터를 재사용해 'not a valid Android APK' 로 실패하던 것을 제거
+  - 설치 직후 자동 활성화(setWatchFaceAsActive)가 삼성 워치페이스 picker 의 '현재 페이스가 favorites 에 없음' 불일치를 유발해 멈추던 것을 제거
+- 워치페이스 설치 진행 알림을 앱 업데이트 문구('워치 앱 전송 중')와 분리('워치페이스 설치 중…')
+- 워치페이스 푸시 'timed out' 오탐 제거(전송 await 해제, 결과 최대 120초 대기)
+
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
+
+날짜: 2026-10-04
