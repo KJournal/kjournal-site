@@ -1,0 +1,8 @@
+KJournal 5.4
+
+날짜: 2026-10-14
+
+버그 수정
+- menhera.network와 PsychonautWiki에 같은 물질이 있어도 이름 표기가 조금씩 달라(대소문자/공백/하이픈) 중복 항목으로 두 번 나타나던 문제를 수정했습니다. 이름과 별칭(commonNames)을 정규화해 비교합니다.
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
