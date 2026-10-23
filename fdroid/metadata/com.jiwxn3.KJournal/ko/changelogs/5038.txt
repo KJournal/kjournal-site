@@ -1,0 +1,9 @@
+KJournal 5.6
+
+날짜: 2026-10-23
+
+버그 수정
+- 설정 '업데이트'(및 하단 '버전') 행을 누르면 릴리즈 노트 화면이 정상적으로 열리고 릴리즈 노트 목록이 표시됩니다.
+- 새 버전이 있어도 업데이트 확인이 실패해 안내가 뜨지 않던 문제를 수정했습니다. (OTA 요청 헤더 오류)
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
