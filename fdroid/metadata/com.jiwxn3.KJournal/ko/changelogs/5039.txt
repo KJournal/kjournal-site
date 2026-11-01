@@ -1,0 +1,12 @@
+KJournal 5.7
+
+날짜: 2026-11-01
+
+새 기능
+- K저널 도구에서 menhera.network 동기화로 전체 다운로드한 성분·제품·용량·지속시간·상호작용·제품 성분 구성과 검토/출처 메타데이터를 JSON으로 내보내고 복원할 수 있습니다.
+- MenheraNetworkDownload v2 형식을 사용하며 기존 MenheraCache v1 가져오기도 지원합니다. 사용자 개인 자료는 포함하지 않습니다.
+
+버그 수정
+- Android 16에서 텍스트 bounds 계산 중 발생하던 호환성 크래시를 수정했습니다.
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
