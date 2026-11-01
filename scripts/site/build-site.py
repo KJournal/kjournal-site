@@ -320,6 +320,8 @@ def main():
     ap.add_argument('--alpha-version', default=None, help='알파 표시 버전 라벨 (기본: APK 파일명 기반)')
     ap.add_argument('--ios-ipa', default=None,
                     help='iOS 다운로드 IPA (기본: dist/ios/*.ipa 최신, 없으면 iOS 탭 숨김)')
+    ap.add_argument('--ios-version', default=None,
+                    help='iOS 표시 버전 라벨 (기본: IPA Info.plist CFBundleShortVersionString)')
     ap.add_argument('--repo-url', default=DEFAULT_REPO)
     ap.add_argument('--site-url', default=DEFAULT_SITE)
     ap.add_argument('--skip-index', action='store_true', help='F-Droid 저장소 생성을 건너뛴다')
@@ -367,7 +369,7 @@ def main():
 
     if ios is not None:
         ios_info = parse_ipa(ios)
-        ios_version = (ios_info.get('versionName')
+        ios_version = (args.ios_version or ios_info.get('versionName')
                        or ios.stem.replace('KJournal-', '').removesuffix('-ios'))
         ios_digest = sha256(ios)
         ios_size_mb = f'{ios.stat().st_size / (1024 * 1024):.1f}'
