@@ -1,0 +1,10 @@
+KJournal 5.8
+
+날짜: 2026-11-12
+
+버그 수정
+- 타임라인 위젯이 로딩 화면에서 멈추던 무한 로딩 문제를 근본 수정했습니다. 위젯 갱신을 담당하는 WorkManager 가 초기화되지 않던 문제를 해결했습니다.
+- 위젯 그래픽이 흐리거나 찌그러지던 렌더링 문제를 수정했습니다.
+- 위젯 갱신 중 오류가 나도 위젯이 죽지 않고 다음 갱신 주기에 다시 시도합니다.
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
