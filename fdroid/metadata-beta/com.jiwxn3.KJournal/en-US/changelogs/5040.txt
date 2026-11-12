@@ -1,0 +1,13 @@
+KJournal 5 PB8.14
+
+날짜: 2026-11-12
+
+새 기능
+- 기기간 동기화 화면에 비밀번호 변경, 복구 코드 발급/표시, 복구 코드로 비밀번호 재설정을 추가했습니다.
+- 버전간 연결(link): 같은 기기에 설치된 다른 버전(알파·베타·정식)으로 계정을 넘길 수 있습니다. 기기간 QR 연결은 그대로 유지되며, 암호화·서버 절차는 동일합니다. 링크에는 세션 정보만 담고 자격증명은 X25519+HKDF+AES-256-GCM 으로 봉인합니다.
+
+버그 수정
+- 계정 생성 시 app_channel 값이 서버 허용값(alpha/beta/stable/unknown)이 아니어서 가입이 실패하던 문제를 수정했습니다.
+
+GitHub: https://github.com/KJournal
+사이트: https://kjournal.github.io/kjournal-site/
